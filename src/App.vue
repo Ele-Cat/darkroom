@@ -103,6 +103,7 @@ const gameLoop = () => {
 
 // 初始化
 onMounted(() => {
+  console.log("A dark room");
   // 加载游戏状态
   gameStore.loadGameState()
   
