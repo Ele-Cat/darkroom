@@ -103,7 +103,6 @@ const gameLoop = () => {
 
 // 初始化
 onMounted(() => {
-  console.log("A dark room");
   // 加载游戏状态
   gameStore.loadGameState()
   
@@ -118,7 +117,7 @@ onMounted(() => {
   
   // 初始化任务进场话术
   if (!gameStore.fireLit) {
-    gameStore.addLog('🎯 任务：点燃火堆')
+    gameStore.addLog('🎯 任务：点燃火堆1')
     gameStore.addLog('寒冷的夜晚即将来临，你需要收集木材并点燃火堆来取暖。')
     gameStore.addLog('提示：点击\'收集木材\'按钮获取木材，然后点击\'点燃火堆\'按钮生火。')
   }
