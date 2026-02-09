@@ -43,7 +43,8 @@ export const useGameStore = defineStore('game', {
       fireTimer: 0,
       hunterRageTimer: 0,
       nextFireTime: Math.floor(Math.random() * (15 - 10 + 1)) + 10, // 10-15分钟
-      nextHunterRageTime: Math.floor(Math.random() * (10 - 5 + 1)) + 5 // 5-10分钟
+      nextHunterRageTime: Math.floor(Math.random() * (10 - 5 + 1)) + 5, // 5-10分钟
+      disasterActive: false // 标记是否有天灾正在显示
     },
     logs: []
   }),
@@ -155,7 +156,7 @@ export const useGameStore = defineStore('game', {
     isJobModuleUnlocked: (state) => {
       return state.jobModuleUnlocked
     }
-  }),
+  },
   actions: {
     getVillageName() {
       const level = this.villageLevel
@@ -696,6 +697,12 @@ export const useGameStore = defineStore('game', {
     
     // 触发火灾天灾
     triggerFireDisaster() {
+      // 如果已有天灾活跃，不触发新的天灾
+      if (this.disasterSystem.disasterActive) return
+      
+      // 标记天灾开始
+      this.disasterSystem.disasterActive = true
+      
       // 计算烧掉的小屋数量（1-2个）
       const hutsBurned = Math.floor(Math.random() * 2) + 1
       // 计算需要去除的人员数量（每个小屋最多容纳的人数）
@@ -743,7 +750,13 @@ export const useGameStore = defineStore('game', {
     
     // 触发猎物狂暴天灾
     triggerHunterRageDisaster() {
+      // 如果已有天灾活跃，不触发新的天灾
+      if (this.disasterSystem.disasterActive) return
+      
       if (this.jobs.hunter <= 0) return
+      
+      // 标记天灾开始
+      this.disasterSystem.disasterActive = true
       
       // 计算丢失的猎人数量（至少1个，最多猎人总数的20%）
       const minLoss = 1
@@ -765,6 +778,9 @@ export const useGameStore = defineStore('game', {
     
     // 处理灾难确认
     handleDisasterConfirm(disaster) {
+      // 标记天灾结束
+      this.disasterSystem.disasterActive = false
+      
       switch (disaster.type) {
         case 'fire':
           this.addLog(`火灾烧掉了${disaster.data.hutsBurned}个小屋，${disaster.data.peopleLost}人不幸遇难`, 2)
