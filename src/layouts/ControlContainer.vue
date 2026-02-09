@@ -13,10 +13,22 @@
   <button id="darkModeToggle" class="control-button dark-mode-toggle" @click="toggleDarkMode" :title="darkMode ? '切换为亮色模式' : '切换为暗黑模式'">
     {{ darkMode ? '🌙' : '☀️' }}
   </button>
+  
+  <!-- 导入导出模态框 -->
+  <ImportExportModal 
+    v-if="isDev"
+    :is-visible="showImportExportModal"
+    @close="showImportExportModal = false"
+    @export-game="handleExportGame"
+    @import-game="handleImportGame"
+  />
 </template>
 
 <script setup>
-defineProps({
+import { ref } from 'vue'
+import ImportExportModal from '@/components/ImportExportModal.vue'
+
+const props = defineProps({
   darkMode: {
     type: Boolean,
     required: true
@@ -27,18 +39,36 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['reset-game', 'open-import-export', 'toggle-dark-mode'])
+const emit = defineEmits(['reset-game', 'toggle-dark-mode'])
+
+const showImportExportModal = ref(false)
 
 const resetGame = () => {
   emit('reset-game')
 }
 
 const openImportExport = () => {
-  emit('open-import-export')
+  showImportExportModal.value = true
 }
 
 const toggleDarkMode = () => {
   emit('toggle-dark-mode')
+}
+
+// 处理导出游戏
+const handleExportGame = () => {
+  // 直接调用全局的gameStore方法
+  if (window.gameStore) {
+    window.gameStore.exportGame()
+  }
+}
+
+// 处理导入游戏
+const handleImportGame = () => {
+  // 直接调用全局的gameStore方法
+  if (window.gameStore) {
+    window.gameStore.importGame()
+  }
 }
 </script>
 

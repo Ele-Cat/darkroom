@@ -16,19 +16,12 @@
     <MouseContainer />
   </div>
   
-  <ImportExportModal 
-    v-if="isDev"
-    :is-visible="showImportExportModal"
-    @close="showImportExportModal = false"
-    @export-game="gameStore.exportGame"
-    @import-game="gameStore.importGame"
-  />
+
   
   <ControlContainer 
     :dark-mode="gameStore.darkMode"
     :is-dev="isDev"
     @reset-game="gameStore.resetGame"
-    @open-import-export="showImportExportModal = true"
     @toggle-dark-mode="toggleDarkMode"
   />
   
@@ -48,7 +41,6 @@ import LogsContainer from '@/layouts/LogsContainer.vue'
 import TabContainer from '@/layouts/TabContainer.vue'
 import HomeContainer from '@/layouts/HomeContainer.vue'
 import MouseContainer from '@/layouts/MouseContainer.vue'
-import ImportExportModal from '@/components/ImportExportModal.vue'
 import DisasterModal from '@/components/DisasterModal.vue'
 import ControlContainer from '@/layouts/ControlContainer.vue'
 
@@ -60,7 +52,6 @@ const gameStore = useGameStore()
 provide('gameStore', gameStore)
 const activeTab = ref('cabin')
 provide('activeTab', activeTab)
-const showImportExportModal = ref(false)
 const showDisasterModal = ref(false)
 const currentDisasterType = ref('')
 const currentDisasterData = ref({})
