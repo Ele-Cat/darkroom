@@ -29,6 +29,13 @@
     @open-import-export="showImportExportModal = true"
     @toggle-dark-mode="toggleDarkMode"
   />
+  
+  <DisasterModal 
+    :is-visible="showDisasterModal"
+    :disaster-type="currentDisasterType"
+    :disaster-data="currentDisasterData"
+    @confirm="handleDisasterConfirm"
+  />
 </template>
 
 <script setup>
@@ -40,6 +47,7 @@ import TabContainer from '@/layouts/TabContainer.vue'
 import HomeContainer from '@/layouts/HomeContainer.vue'
 import MouseContainer from '@/layouts/MouseContainer.vue'
 import ImportExportModal from '@/components/ImportExportModal.vue'
+import DisasterModal from '@/components/DisasterModal.vue'
 import ControlContainer from '@/layouts/ControlContainer.vue'
 
 const gameStore = useGameStore()
@@ -48,6 +56,9 @@ provide('gameStore', gameStore)
 const activeTab = ref('cabin')
 provide('activeTab', activeTab)
 const showImportExportModal = ref(false)
+const showDisasterModal = ref(false)
+const currentDisasterType = ref('')
+const currentDisasterData = ref({})
 let gameLoopInterval = null
 
 // 更新浏览器标题
@@ -89,6 +100,29 @@ const toggleDarkMode = () => {
   gameStore.toggleDarkMode()
   updateDarkModeClass()
 }
+
+// 处理灾难模态框确认
+const handleDisasterConfirm = () => {
+  showDisasterModal.value = false
+  
+  // 触发灾难确认事件，让gameStore处理后续逻辑
+  eventBus.emit('disasterConfirmed', {
+    type: currentDisasterType.value,
+    data: currentDisasterData.value
+  })
+}
+
+// 监听灾难事件，显示灾难模态框
+eventBus.on('disasterOccurred', (disaster) => {
+  showDisasterModal.value = true
+  currentDisasterType.value = disaster.type
+  currentDisasterData.value = disaster.data
+})
+
+// 监听灾难确认事件，处理后续逻辑
+eventBus.on('disasterConfirmed', (disaster) => {
+  gameStore.handleDisasterConfirm(disaster)
+})
 
 // 更新暗黑模式类
 const updateDarkModeClass = () => {
