@@ -5,7 +5,7 @@
   </button>
   
   <!-- 导入导出控制按钮 -->
-  <button id="importExportToggle" class="control-button import-export-toggle" @click="openImportExport" title="导入导出">
+  <button v-if="isDev" id="importExportToggle" class="control-button import-export-toggle" @click="openImportExport" title="导入导出">
     📤
   </button>
   
@@ -13,28 +13,62 @@
   <button id="darkModeToggle" class="control-button dark-mode-toggle" @click="toggleDarkMode" :title="darkMode ? '切换为亮色模式' : '切换为暗黑模式'">
     {{ darkMode ? '🌙' : '☀️' }}
   </button>
+  
+  <!-- 导入导出模态框 -->
+  <ImportExportModal 
+    v-if="isDev"
+    :is-visible="showImportExportModal"
+    @close="showImportExportModal = false"
+    @export-game="handleExportGame"
+    @import-game="handleImportGame"
+  />
 </template>
 
 <script setup>
-defineProps({
+import { ref } from 'vue'
+import ImportExportModal from '@/components/ImportExportModal.vue'
+
+const props = defineProps({
   darkMode: {
     type: Boolean,
     required: true
+  },
+  isDev: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['reset-game', 'open-import-export', 'toggle-dark-mode'])
+const emit = defineEmits(['reset-game', 'toggle-dark-mode'])
+
+const showImportExportModal = ref(false)
 
 const resetGame = () => {
   emit('reset-game')
 }
 
 const openImportExport = () => {
-  emit('open-import-export')
+  showImportExportModal.value = true
 }
 
 const toggleDarkMode = () => {
   emit('toggle-dark-mode')
+}
+
+// 处理导出游戏
+const handleExportGame = () => {
+  // 直接调用全局的gameStore方法
+  if (window.gameStore) {
+    window.gameStore.exportGame()
+  }
+}
+
+// 处理导入游戏
+const handleImportGame = () => {
+  // 直接调用全局的gameStore方法
+  if (window.gameStore) {
+    window.gameStore.importGame()
+  }
 }
 </script>
 
@@ -87,6 +121,13 @@ const toggleDarkMode = () => {
 .dark-mode-toggle {
   bottom: 15px;
   right: 15px;
+}
+
+/* 生产环境下的布局调整（没有导入导出按钮） */
+.import-export-toggle:not(:only-child) + .dark-mode-toggle {
+  .reset-game-toggle {
+    right: 61px;
+  }
 }
 
 .import-export-toggle, .dark-mode-toggle {

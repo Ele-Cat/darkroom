@@ -38,6 +38,14 @@ export const useGameStore = defineStore('game', {
     },
     // 资源增加计数器（每100次触发一次，即10秒）
     resourceTimerCounter: 0,
+    // 天灾系统
+    disasterSystem: {
+      fireTimer: 0,
+      hunterRageTimer: 0,
+      nextFireTime: Math.floor(Math.random() * (15 - 10 + 1)) + 10, // 10-15分钟
+      nextHunterRageTime: Math.floor(Math.random() * (10 - 5 + 1)) + 5, // 5-10分钟
+      disasterActive: false // 标记是否有天灾正在显示
+    },
     logs: []
   }),
   getters: {
@@ -658,8 +666,132 @@ export const useGameStore = defineStore('game', {
         // 触发所有资源增加逻辑
         this.increaseResourcesByCart()
         this.increaseResourcesByJobs()
+        
+        // 天灾系统定时器（每10秒更新一次）
+        if (this.villageLevel >= 10) {
+          this.updateDisasterTimers()
+        }
       }
     },
+    
+    // 更新天灾系统定时器
+    updateDisasterTimers() {
+      // 火灾定时器（10-15分钟）
+      this.disasterSystem.fireTimer += 10 // 每次增加10秒
+      if (this.disasterSystem.fireTimer >= this.disasterSystem.nextFireTime * 60) {
+        this.disasterSystem.fireTimer = 0
+        this.disasterSystem.nextFireTime = Math.floor(Math.random() * (15 - 10 + 1)) + 10 // 重置为10-15分钟
+        this.triggerFireDisaster()
+      }
+      
+      // 猎物狂暴定时器（5-10分钟）
+      if (this.jobs.hunter > 0) {
+        this.disasterSystem.hunterRageTimer += 10 // 每次增加10秒
+        if (this.disasterSystem.hunterRageTimer >= this.disasterSystem.nextHunterRageTime * 60) {
+          this.disasterSystem.hunterRageTimer = 0
+          this.disasterSystem.nextHunterRageTime = Math.floor(Math.random() * (10 - 5 + 1)) + 5 // 重置为5-10分钟
+          this.triggerHunterRageDisaster()
+        }
+      }
+    },
+    
+    // 触发火灾天灾
+    triggerFireDisaster() {
+      // 如果已有天灾活跃，不触发新的天灾
+      if (this.disasterSystem.disasterActive) return
+      
+      // 标记天灾开始
+      this.disasterSystem.disasterActive = true
+      
+      // 计算烧掉的小屋数量（1-2个）
+      const hutsBurned = Math.floor(Math.random() * 2) + 1
+      // 计算需要去除的人员数量（每个小屋最多容纳的人数）
+      const peoplePerCabin = defaultSettings.building.cabin.maxPopulationPerCabin
+      const peopleToRemove = Math.min(hutsBurned * peoplePerCabin, this.population)
+      
+      if (peopleToRemove > 0) {
+        // 先从闲散人员中去除
+        const totalJobs = Object.values(this.jobs).reduce((sum, count) => sum + count, 0)
+        const idlePeople = this.population - totalJobs
+        
+        if (idlePeople >= peopleToRemove) {
+          // 闲散人员足够，不需要调整工种人数
+          this.population -= peopleToRemove
+        } else {
+          // 闲散人员不足，需要按比例从工种人员中减人
+          this.population -= peopleToRemove
+          const remainingToRemove = peopleToRemove - idlePeople
+          
+          // 计算各工种人数比例
+          const jobCounts = Object.entries(this.jobs)
+          const totalJobPeople = totalJobs
+          
+          // 按比例减人
+          jobCounts.forEach(([jobId, count]) => {
+            if (count > 0) {
+              const removalCount = Math.floor((count / totalJobPeople) * remainingToRemove)
+              if (removalCount > 0) {
+                this.jobs[jobId] = Math.max(0, count - removalCount)
+              }
+            }
+          })
+        }
+      }
+      
+      // 显示灾难模态框
+      eventBus.emit('disasterOccurred', {
+        type: 'fire',
+        data: {
+          hutsBurned: hutsBurned,
+          peopleLost: peopleToRemove
+        }
+      })
+    },
+    
+    // 触发猎物狂暴天灾
+    triggerHunterRageDisaster() {
+      // 如果已有天灾活跃，不触发新的天灾
+      if (this.disasterSystem.disasterActive) return
+      
+      if (this.jobs.hunter <= 0) return
+      
+      // 标记天灾开始
+      this.disasterSystem.disasterActive = true
+      
+      // 计算丢失的猎人数量（至少1个，最多猎人总数的20%）
+      const minLoss = 1
+      const maxLoss = Math.ceil(this.jobs.hunter * 0.2)
+      const huntersLost = Math.floor(Math.random() * (maxLoss - minLoss + 1)) + minLoss
+      
+      // 减少猎人数量
+      this.jobs.hunter = Math.max(0, this.jobs.hunter - huntersLost)
+      this.population = Math.max(0, this.population - huntersLost)
+      
+      // 显示灾难模态框
+      eventBus.emit('disasterOccurred', {
+        type: 'hunterRage',
+        data: {
+          peopleLost: huntersLost
+        }
+      })
+    },
+    
+    // 处理灾难确认
+    handleDisasterConfirm(disaster) {
+      // 标记天灾结束
+      this.disasterSystem.disasterActive = false
+      
+      switch (disaster.type) {
+        case 'fire':
+          this.addLog(`火灾烧掉了${disaster.data.hutsBurned}个小屋，${disaster.data.peopleLost}人不幸遇难`, 2)
+          break
+        case 'hunterRage':
+          this.addLog(`猎物狂暴导致${disaster.data.peopleLost}名猎人遇难`, 2)
+          break
+      }
+      this.saveGameState()
+    },
+    
     toggleDarkMode() {
       this.darkMode = !this.darkMode
       if (this.darkMode) {

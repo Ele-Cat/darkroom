@@ -13,27 +13,23 @@
       <HomeContainer />
     </div>
     
-    <div 
-      class="mouse-follower"
-      :style="{
-        left: displayMouseX + 'px',
-        top: displayMouseY + 'px'
-      }"
-    ></div>
+    <MouseContainer />
   </div>
   
-  <ImportExportModal 
-    :is-visible="showImportExportModal"
-    @close="showImportExportModal = false"
-    @export-game="gameStore.exportGame"
-    @import-game="gameStore.importGame"
-  />
+
   
   <ControlContainer 
     :dark-mode="gameStore.darkMode"
+    :is-dev="isDev"
     @reset-game="gameStore.resetGame"
-    @open-import-export="showImportExportModal = true"
     @toggle-dark-mode="toggleDarkMode"
+  />
+  
+  <DisasterModal 
+    :is-visible="showDisasterModal"
+    :disaster-type="currentDisasterType"
+    :disaster-data="currentDisasterData"
+    @confirm="handleDisasterConfirm"
   />
 </template>
 
@@ -44,40 +40,22 @@ import eventBus from '@/utils/eventBus'
 import LogsContainer from '@/layouts/LogsContainer.vue'
 import TabContainer from '@/layouts/TabContainer.vue'
 import HomeContainer from '@/layouts/HomeContainer.vue'
-import ImportExportModal from '@/components/ImportExportModal.vue'
+import MouseContainer from '@/layouts/MouseContainer.vue'
+import DisasterModal from '@/components/DisasterModal.vue'
 import ControlContainer from '@/layouts/ControlContainer.vue'
+
+// 检查是否为开发环境
+const isDev = import.meta.env.VITE_APP_ENV === 'development'
 
 const gameStore = useGameStore()
 // 提供gameStore给所有子组件
 provide('gameStore', gameStore)
 const activeTab = ref('cabin')
 provide('activeTab', activeTab)
-const showImportExportModal = ref(false)
+const showDisasterModal = ref(false)
+const currentDisasterType = ref('')
+const currentDisasterData = ref({})
 let gameLoopInterval = null
-
-// 鼠标跟随光圈
-const mouseX = ref(0)
-const mouseY = ref(0)
-const displayMouseX = ref(0)
-const displayMouseY = ref(0)
-let mouseUpdateTimeout = null
-
-// 更新鼠标位置（带延时）
-const updateMousePosition = (e) => {
-  mouseX.value = e.clientX
-  mouseY.value = e.clientY
-  
-  // 清除之前的延时
-  if (mouseUpdateTimeout) {
-    clearTimeout(mouseUpdateTimeout)
-  }
-  
-  // 设置新的延时（100ms）
-  mouseUpdateTimeout = setTimeout(() => {
-    displayMouseX.value = mouseX.value
-    displayMouseY.value = mouseY.value
-  }, 10)
-}
 
 // 更新浏览器标题
 const updateBrowserTitle = (tab) => {
@@ -118,6 +96,29 @@ const toggleDarkMode = () => {
   gameStore.toggleDarkMode()
   updateDarkModeClass()
 }
+
+// 处理灾难模态框确认
+const handleDisasterConfirm = () => {
+  showDisasterModal.value = false
+  
+  // 触发灾难确认事件，让gameStore处理后续逻辑
+  eventBus.emit('disasterConfirmed', {
+    type: currentDisasterType.value,
+    data: currentDisasterData.value
+  })
+}
+
+// 监听灾难事件，显示灾难模态框
+eventBus.on('disasterOccurred', (disaster) => {
+  showDisasterModal.value = true
+  currentDisasterType.value = disaster.type
+  currentDisasterData.value = disaster.data
+})
+
+// 监听灾难确认事件，处理后续逻辑
+eventBus.on('disasterConfirmed', (disaster) => {
+  gameStore.handleDisasterConfirm(disaster)
+})
 
 // 更新暗黑模式类
 const updateDarkModeClass = () => {
@@ -160,23 +161,12 @@ onMounted(() => {
       switchTab('village')
     }
   })
-  
-  // 添加鼠标移动事件监听
-  window.addEventListener('mousemove', updateMousePosition)
 })
 
 // 清理
 onUnmounted(() => {
   if (gameLoopInterval) {
     clearInterval(gameLoopInterval)
-  }
-  
-  // 清理鼠标移动事件监听
-  window.removeEventListener('mousemove', updateMousePosition)
-  
-  // 清理延时定时器
-  if (mouseUpdateTimeout) {
-    clearTimeout(mouseUpdateTimeout)
   }
 })
 
