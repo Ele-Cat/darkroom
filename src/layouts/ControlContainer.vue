@@ -5,7 +5,7 @@
   </button>
   
   <!-- 导入导出控制按钮 -->
-  <button id="importExportToggle" class="control-button import-export-toggle" @click="openImportExport" title="导入导出">
+  <button v-if="isDev" id="importExportToggle" class="control-button import-export-toggle" @click="openImportExport" title="导入导出">
     📤
   </button>
   
@@ -20,6 +20,10 @@ defineProps({
   darkMode: {
     type: Boolean,
     required: true
+  },
+  isDev: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -87,6 +91,13 @@ const toggleDarkMode = () => {
 .dark-mode-toggle {
   bottom: 15px;
   right: 15px;
+}
+
+/* 生产环境下的布局调整（没有导入导出按钮） */
+.import-export-toggle:not(:only-child) + .dark-mode-toggle {
+  .reset-game-toggle {
+    right: 61px;
+  }
 }
 
 .import-export-toggle, .dark-mode-toggle {

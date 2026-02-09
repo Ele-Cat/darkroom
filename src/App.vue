@@ -17,6 +17,7 @@
   </div>
   
   <ImportExportModal 
+    v-if="isDev"
     :is-visible="showImportExportModal"
     @close="showImportExportModal = false"
     @export-game="gameStore.exportGame"
@@ -25,6 +26,7 @@
   
   <ControlContainer 
     :dark-mode="gameStore.darkMode"
+    :is-dev="isDev"
     @reset-game="gameStore.resetGame"
     @open-import-export="showImportExportModal = true"
     @toggle-dark-mode="toggleDarkMode"
@@ -49,6 +51,9 @@ import MouseContainer from '@/layouts/MouseContainer.vue'
 import ImportExportModal from '@/components/ImportExportModal.vue'
 import DisasterModal from '@/components/DisasterModal.vue'
 import ControlContainer from '@/layouts/ControlContainer.vue'
+
+// 检查是否为开发环境
+const isDev = import.meta.env.VITE_APP_ENV === 'development'
 
 const gameStore = useGameStore()
 // 提供gameStore给所有子组件
