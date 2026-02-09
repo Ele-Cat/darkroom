@@ -638,14 +638,6 @@ export const useGameStore = defineStore('game', {
         this.logs.pop()
       }
     },
-    
-    // 调试日志
-    debugLog(message, ...args) {
-      if (isDebug) {
-        console.log(`[DEBUG] ${message}`, ...args)
-      }
-    },
-    
     updateCooldowns() {
       if (this.cooldowns.wood > 0) {
         this.cooldowns.wood -= 0.1
