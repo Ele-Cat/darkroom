@@ -12,6 +12,14 @@
 
       <HomeContainer />
     </div>
+    
+    <div 
+      class="mouse-follower"
+      :style="{
+        left: displayMouseX + 'px',
+        top: displayMouseY + 'px'
+      }"
+    ></div>
   </div>
   
   <ImportExportModal 
@@ -46,6 +54,30 @@ const activeTab = ref('cabin')
 provide('activeTab', activeTab)
 const showImportExportModal = ref(false)
 let gameLoopInterval = null
+
+// 鼠标跟随光圈
+const mouseX = ref(0)
+const mouseY = ref(0)
+const displayMouseX = ref(0)
+const displayMouseY = ref(0)
+let mouseUpdateTimeout = null
+
+// 更新鼠标位置（带延时）
+const updateMousePosition = (e) => {
+  mouseX.value = e.clientX
+  mouseY.value = e.clientY
+  
+  // 清除之前的延时
+  if (mouseUpdateTimeout) {
+    clearTimeout(mouseUpdateTimeout)
+  }
+  
+  // 设置新的延时（100ms）
+  mouseUpdateTimeout = setTimeout(() => {
+    displayMouseX.value = mouseX.value
+    displayMouseY.value = mouseY.value
+  }, 100)
+}
 
 // 更新浏览器标题
 const updateBrowserTitle = (tab) => {
@@ -128,12 +160,23 @@ onMounted(() => {
       switchTab('village')
     }
   })
+  
+  // 添加鼠标移动事件监听
+  window.addEventListener('mousemove', updateMousePosition)
 })
 
 // 清理
 onUnmounted(() => {
   if (gameLoopInterval) {
     clearInterval(gameLoopInterval)
+  }
+  
+  // 清理鼠标移动事件监听
+  window.removeEventListener('mousemove', updateMousePosition)
+  
+  // 清理延时定时器
+  if (mouseUpdateTimeout) {
+    clearTimeout(mouseUpdateTimeout)
   }
 })
 
