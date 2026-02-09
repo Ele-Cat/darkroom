@@ -76,7 +76,7 @@ const updateMousePosition = (e) => {
   mouseUpdateTimeout = setTimeout(() => {
     displayMouseX.value = mouseX.value
     displayMouseY.value = mouseY.value
-  }, 100)
+  }, 10)
 }
 
 // 更新浏览器标题
