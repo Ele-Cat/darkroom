@@ -2,6 +2,9 @@ import { defineStore } from 'pinia'
 import defaultSettings from '@/config/defaultSettings'
 import eventBus from '@/utils/eventBus'
 
+// 调试模式
+const isDebug = import.meta.env.VITE_APP_DEBUG === 'true'
+
 export const useGameStore = defineStore('game', {
   state: () => ({
     wood: 0,
@@ -627,6 +630,7 @@ export const useGameStore = defineStore('game', {
     gatherBerries() {
       this.addLog('你采集了一些浆果')
     },
+    // 添加游戏日志
     addLog(message, type = 0) {
       this.logs.unshift({
         id: Date.now() + Math.random().toString(36).substring(2),
@@ -638,6 +642,14 @@ export const useGameStore = defineStore('game', {
         this.logs.pop()
       }
     },
+    
+    // 调试日志
+    debugLog(message, ...args) {
+      if (isDebug) {
+        console.log(`[DEBUG] ${message}`, ...args)
+      }
+    },
+    
     updateCooldowns(timeElapsed = 100) {
       // 计算实际需要执行的次数（基于100ms间隔）
       const executions = Math.floor(timeElapsed / 100)
@@ -714,6 +726,9 @@ export const useGameStore = defineStore('game', {
       // 计算需要去除的人员数量（每个小屋最多容纳的人数）
       const peoplePerCabin = defaultSettings.building.cabin.maxPopulationPerCabin
       const peopleToRemove = Math.min(hutsBurned * peoplePerCabin, this.population)
+      
+      // 减少小屋数量
+      this.villageLevel = Math.max(0, this.villageLevel - hutsBurned)
       
       if (peopleToRemove > 0) {
         // 先从闲散人员中去除
