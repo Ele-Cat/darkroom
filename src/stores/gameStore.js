@@ -639,6 +639,7 @@ export const useGameStore = defineStore('game', {
       }
     },
     updateCooldowns() {
+      // 固定每100ms执行一次的逻辑
       if (this.cooldowns.wood > 0) {
         this.cooldowns.wood -= 0.1
         if (this.cooldowns.wood < 0) {

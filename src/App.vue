@@ -130,8 +130,23 @@ const updateDarkModeClass = () => {
 }
 
 // 游戏循环
-const gameLoop = () => {
-  gameStore.updateCooldowns()
+let lastTimestamp = 0
+const gameLoop = (timestamp) => {
+  if (!lastTimestamp) {
+    lastTimestamp = timestamp
+  }
+  
+  // 计算实际经过的时间（毫秒）
+  const elapsedTime = timestamp - lastTimestamp
+  
+  // 每100毫秒执行一次游戏逻辑
+  if (elapsedTime >= 100) {
+    gameStore.updateCooldowns()
+    lastTimestamp = timestamp
+  }
+  
+  // 继续下一帧
+  gameLoopInterval = requestAnimationFrame(gameLoop)
 }
 
 // 初始化
@@ -146,7 +161,7 @@ onMounted(() => {
   updateBrowserTitle(activeTab.value)
   
   // 启动游戏循环
-  gameLoopInterval = setInterval(gameLoop, 100)
+  gameLoopInterval = requestAnimationFrame(gameLoop)
   
   // 初始化任务进场话术
   if (!gameStore.fireLit) {
@@ -166,7 +181,7 @@ onMounted(() => {
 // 清理
 onUnmounted(() => {
   if (gameLoopInterval) {
-    clearInterval(gameLoopInterval)
+    cancelAnimationFrame(gameLoopInterval)
   }
 })
 
