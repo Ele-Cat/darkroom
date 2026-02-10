@@ -15,9 +15,8 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src')
       }
     },
+    base: env.VITE_BASE_PATH,
     build: {
-      // 静态资源的基础路径
-      base: env.VITE_BASE_PATH,
       // 调试模式下生成sourcemap
       sourcemap: isDebug,
       // 生产模式下的压缩选项
