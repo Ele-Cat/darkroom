@@ -54,8 +54,9 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { inject, ref } from "vue";
 import ImportExportModal from "@/components/ImportExportModal.vue";
+const gameStore = inject('gameStore')
 
 const props = defineProps({
   darkMode: {
@@ -86,34 +87,27 @@ const toggleDarkMode = () => {
 
 // 处理导出游戏
 const handleExportGame = () => {
-  // 直接调用全局的gameStore方法
-  if (window.gameStore) {
-    window.gameStore.exportGame();
-  }
+  gameStore.exportGame();
 };
 
 // 处理导入游戏
 const handleImportGame = () => {
-  // 直接调用全局的gameStore方法
-  if (window.gameStore) {
-    window.gameStore.importGame()
-  }
+  gameStore.importGame()
 };
 
 // 手动触发天灾
 const triggerDisaster = () => {
-  // 直接调用全局的gameStore方法
-  if (window.gameStore) {
-    // 随机选择触发火灾或猎物狂暴
-    const disasterType = Math.random() > 0.5 ? 'fire' : 'hunterRage';
-    if (disasterType === 'fire') {
-      window.gameStore.triggerFireDisaster();
-    } else if (window.gameStore.jobs.hunter > 0) {
-      window.gameStore.triggerHunterRageDisaster();
-    } else {
-      // 如果没有猎人，默认触发火灾
-      window.gameStore.triggerFireDisaster();
-    }
+  gameStore.triggerFireDisaster();
+  return
+  // 随机选择触发火灾或猎物狂暴
+  const disasterType = Math.random() > 0.5 ? 'fire' : 'hunterRage';
+  if (disasterType === 'fire') {
+    gameStore.triggerFireDisaster();
+  } else if (gameStore.jobs.hunter > 0) {
+    gameStore.triggerHunterRageDisaster();
+  } else {
+    // 如果没有猎人，默认触发火灾
+    gameStore.triggerFireDisaster();
   }
 };
 </script>

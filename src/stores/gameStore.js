@@ -2,9 +2,6 @@ import { defineStore } from 'pinia'
 import defaultSettings from '@/config/defaultSettings'
 import eventBus from '@/utils/eventBus'
 
-// 调试模式
-const isDebug = import.meta.env.VITE_APP_DEBUG === 'true'
-
 export const useGameStore = defineStore('game', {
   state: () => ({
     wood: 0,
@@ -630,7 +627,6 @@ export const useGameStore = defineStore('game', {
     gatherBerries() {
       this.addLog('你采集了一些浆果')
     },
-    // 添加游戏日志
     addLog(message, type = 0) {
       this.logs.unshift({
         id: Date.now() + Math.random().toString(36).substring(2),
@@ -642,14 +638,6 @@ export const useGameStore = defineStore('game', {
         this.logs.pop()
       }
     },
-    
-    // 调试日志
-    debugLog(message, ...args) {
-      if (isDebug) {
-        console.log(`[DEBUG] ${message}`, ...args)
-      }
-    },
-    
     updateCooldowns(timeElapsed = 100) {
       // 计算实际需要执行的次数（基于100ms间隔）
       const executions = Math.floor(timeElapsed / 100)
@@ -748,12 +736,38 @@ export const useGameStore = defineStore('game', {
           const totalJobPeople = totalJobs
           
           // 按比例减人
+          let remainingToRemoveAfterAllocation = remainingToRemove
+          const removalCounts = {}
+          
+          // 第一次分配：计算每个工种应减少的人数（向下取整）
           jobCounts.forEach(([jobId, count]) => {
             if (count > 0) {
               const removalCount = Math.floor((count / totalJobPeople) * remainingToRemove)
-              if (removalCount > 0) {
-                this.jobs[jobId] = Math.max(0, count - removalCount)
+              removalCounts[jobId] = removalCount
+              remainingToRemoveAfterAllocation -= removalCount
+            } else {
+              removalCounts[jobId] = 0
+            }
+          })
+          
+          // 第二次分配：处理剩余的人数（向上取整的余数）
+          if (remainingToRemoveAfterAllocation > 0) {
+            // 按人数比例排序，优先分配给人数多的工种
+            const sortedJobs = [...jobCounts].sort(([,a], [,b]) => b - a)
+            
+            // 分配剩余的人数
+            for (let i = 0; i < remainingToRemoveAfterAllocation && i < sortedJobs.length; i++) {
+              const [jobId] = sortedJobs[i]
+              if (this.jobs[jobId] > 0) {
+                removalCounts[jobId]++
               }
+            }
+          }
+          
+          // 应用减少的人数
+          Object.entries(removalCounts).forEach(([jobId, removalCount]) => {
+            if (removalCount > 0) {
+              this.jobs[jobId] = Math.max(0, this.jobs[jobId] - removalCount)
             }
           })
         }
