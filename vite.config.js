@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       // 静态资源的基础路径
-      base: isDebug ? './' : '/darkroom/',
+      base: env.VITE_BASE_PATH,
       // 调试模式下生成sourcemap
       sourcemap: isDebug,
       // 生产模式下的压缩选项
