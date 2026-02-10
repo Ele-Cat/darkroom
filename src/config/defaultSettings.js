@@ -133,6 +133,24 @@ const defaultSettings = {
         stoneEfficiency: 0
       }
     ]
+  },
+  // 天灾系统配置
+  disaster: {
+    // 统一的天灾CD时间范围（分钟）
+    cd: {
+      min: 5, // 最小CD时间（分钟）
+      max: 15 // 最大CD时间（分钟）
+    },
+    // 火灾天灾配置
+    fire: {
+      minHutsBurned: 1, // 最少烧掉的小屋数量
+      maxHutsBurned: 2, // 最多烧掉的小屋数量
+    },
+    // 猎物狂暴天灾配置
+    hunterRage: {
+      minLoss: 1, // 最少损失的猎人数量
+      maxLossPercentage: 0.2 // 最多损失猎人总数的百分比
+    }
   }
 }
 

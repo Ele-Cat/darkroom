@@ -97,16 +97,11 @@ const handleImportGame = () => {
 
 // 手动触发天灾
 const triggerDisaster = () => {
-  gameStore.triggerFireDisaster();
-  return
   // 随机选择触发火灾或猎物狂暴
   const disasterType = Math.random() > 0.5 ? 'fire' : 'hunterRage';
-  if (disasterType === 'fire') {
-    gameStore.triggerFireDisaster();
-  } else if (gameStore.jobs.hunter > 0) {
+  if (disasterType === 'hunterRage' && gameStore.jobs.hunter > 0) {
     gameStore.triggerHunterRageDisaster();
   } else {
-    // 如果没有猎人，默认触发火灾
     gameStore.triggerFireDisaster();
   }
 };
