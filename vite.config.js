@@ -18,8 +18,6 @@ export default defineConfig(({ mode }) => {
     build: {
       // 调试模式下生成sourcemap
       sourcemap: isDebug,
-      // 调试模式下不进行代码压缩
-      minify: !isDebug ? 'terser' : false,
       // 生产模式下的压缩选项
       terserOptions: {
         compress: {
