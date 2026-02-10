@@ -16,29 +16,34 @@ const mouseX = ref(0)
 const mouseY = ref(0)
 const displayMouseX = ref(0)
 const displayMouseY = ref(0)
-let mouseUpdateTimeout = null
+let animationFrameId = null
 
-// 更新鼠标位置（带延时）
+// 缓动系数（0-1之间，值越大跟随越快）
+const easingFactor = 0.15
+
+// 更新鼠标位置
 const updateMousePosition = (e) => {
   mouseX.value = e.clientX
   mouseY.value = e.clientY
+}
+
+// 平滑动画
+const animate = () => {
+  // 使用缓动函数计算新的位置
+  displayMouseX.value += (mouseX.value - displayMouseX.value) * easingFactor
+  displayMouseY.value += (mouseY.value - displayMouseY.value) * easingFactor
   
-  // 清除之前的延时
-  if (mouseUpdateTimeout) {
-    clearTimeout(mouseUpdateTimeout)
-  }
-  
-  // 设置新的延时（10ms）
-  mouseUpdateTimeout = setTimeout(() => {
-    displayMouseX.value = mouseX.value
-    displayMouseY.value = mouseY.value
-  }, 10)
+  // 继续下一帧
+  animationFrameId = requestAnimationFrame(animate)
 }
 
 // 初始化
 onMounted(() => {
   // 添加鼠标移动事件监听
   window.addEventListener('mousemove', updateMousePosition)
+  
+  // 启动动画循环
+  animationFrameId = requestAnimationFrame(animate)
 })
 
 // 清理
@@ -46,9 +51,9 @@ onUnmounted(() => {
   // 清理鼠标移动事件监听
   window.removeEventListener('mousemove', updateMousePosition)
   
-  // 清理延时定时器
-  if (mouseUpdateTimeout) {
-    clearTimeout(mouseUpdateTimeout)
+  // 清理动画帧
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
   }
 })
 </script>
@@ -65,7 +70,6 @@ onUnmounted(() => {
   pointer-events: none;
   z-index: 9999;
   transform: translate(-50%, -50%);
-  transition: left 0.1s ease-out, top 0.1s ease-out;
   box-shadow: 0 0 5px rgba(255, 255, 255, 0.05);
 }
 

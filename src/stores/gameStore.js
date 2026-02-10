@@ -638,38 +638,44 @@ export const useGameStore = defineStore('game', {
         this.logs.pop()
       }
     },
-    updateCooldowns() {
-      if (this.cooldowns.wood > 0) {
-        this.cooldowns.wood -= 0.1
-        if (this.cooldowns.wood < 0) {
-          this.cooldowns.wood = 0
-        }
-      }
-      if (this.cooldowns.stone > 0) {
-        this.cooldowns.stone -= 0.1
-        if (this.cooldowns.stone < 0) {
-          this.cooldowns.stone = 0
-        }
-      }
-      if (this.cooldowns.trap > 0) {
-        this.cooldowns.trap -= 0.1
-        if (this.cooldowns.trap < 0) {
-          this.cooldowns.trap = 0
-        }
-      }
+    updateCooldowns(timeElapsed = 100) {
+      // 计算实际需要执行的次数（基于100ms间隔）
+      const executions = Math.floor(timeElapsed / 100)
       
-      // 增加资源计数器
-      this.resourceTimerCounter++
-      // 每100次触发一次（10秒）
-      if (this.resourceTimerCounter >= 100) {
-        this.resourceTimerCounter = 0
-        // 触发所有资源增加逻辑
-        this.increaseResourcesByCart()
-        this.increaseResourcesByJobs()
+      for (let i = 0; i < executions; i++) {
+        // 每100ms执行一次的逻辑
+        if (this.cooldowns.wood > 0) {
+          this.cooldowns.wood -= 0.1
+          if (this.cooldowns.wood < 0) {
+            this.cooldowns.wood = 0
+          }
+        }
+        if (this.cooldowns.stone > 0) {
+          this.cooldowns.stone -= 0.1
+          if (this.cooldowns.stone < 0) {
+            this.cooldowns.stone = 0
+          }
+        }
+        if (this.cooldowns.trap > 0) {
+          this.cooldowns.trap -= 0.1
+          if (this.cooldowns.trap < 0) {
+            this.cooldowns.trap = 0
+          }
+        }
         
-        // 天灾系统定时器（每10秒更新一次）
-        if (this.villageLevel >= 10) {
-          this.updateDisasterTimers()
+        // 增加资源计数器
+        this.resourceTimerCounter++
+        // 每100次触发一次（10秒）
+        if (this.resourceTimerCounter >= 100) {
+          this.resourceTimerCounter = 0
+          // 触发所有资源增加逻辑
+          this.increaseResourcesByCart()
+          this.increaseResourcesByJobs()
+          
+          // 天灾系统定时器（每10秒更新一次）
+          if (this.villageLevel >= 10) {
+            this.updateDisasterTimers()
+          }
         }
       }
     },
