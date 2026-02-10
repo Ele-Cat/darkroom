@@ -1,21 +1,39 @@
 <template>
-  <!-- 一键重置游戏按钮 -->
-  <button id="resetGameToggle" class="control-button reset-game-toggle" @click="resetGame" title="一键重置游戏">
-    🔄
-  </button>
-  
-  <!-- 导入导出控制按钮 -->
-  <button v-if="isDev" id="importExportToggle" class="control-button import-export-toggle" @click="openImportExport" title="导入导出">
-    📤
-  </button>
-  
-  <!-- 暗黑模式切换按钮 -->
-  <button id="darkModeToggle" class="control-button dark-mode-toggle" @click="toggleDarkMode" :title="darkMode ? '切换为亮色模式' : '切换为暗黑模式'">
-    {{ darkMode ? '🌙' : '☀️' }}
-  </button>
-  
+  <div class="control-buttons">
+    <!-- 一键重置游戏按钮 -->
+    <button
+      id="resetGameToggle"
+      class="control-button reset-game-toggle"
+      @click="resetGame"
+      title="一键重置游戏"
+    >
+      🔄
+    </button>
+
+    <!-- 导入导出控制按钮 -->
+    <button
+      v-if="isDev"
+      id="importExportToggle"
+      class="control-button import-export-toggle"
+      @click="openImportExport"
+      title="导入导出"
+    >
+      📤
+    </button>
+
+    <!-- 暗黑模式切换按钮 -->
+    <button
+      id="darkModeToggle"
+      class="control-button dark-mode-toggle"
+      @click="toggleDarkMode"
+      :title="darkMode ? '切换为亮色模式' : '切换为暗黑模式'"
+    >
+      {{ darkMode ? "🌙" : "☀️" }}
+    </button>
+  </div>
+
   <!-- 导入导出模态框 -->
-  <ImportExportModal 
+  <ImportExportModal
     v-if="isDev"
     :is-visible="showImportExportModal"
     @close="showImportExportModal = false"
@@ -25,116 +43,101 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import ImportExportModal from '@/components/ImportExportModal.vue'
+import { ref } from "vue";
+import ImportExportModal from "@/components/ImportExportModal.vue";
 
 const props = defineProps({
   darkMode: {
     type: Boolean,
-    required: true
+    required: true,
   },
   isDev: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 
-const emit = defineEmits(['reset-game', 'toggle-dark-mode'])
+const emit = defineEmits(["reset-game", "toggle-dark-mode"]);
 
-const showImportExportModal = ref(false)
+const showImportExportModal = ref(false);
 
 const resetGame = () => {
-  emit('reset-game')
-}
+  emit("reset-game");
+};
 
 const openImportExport = () => {
-  showImportExportModal.value = true
-}
+  showImportExportModal.value = true;
+};
 
 const toggleDarkMode = () => {
-  emit('toggle-dark-mode')
-}
+  emit("toggle-dark-mode");
+};
 
 // 处理导出游戏
 const handleExportGame = () => {
   // 直接调用全局的gameStore方法
   if (window.gameStore) {
-    window.gameStore.exportGame()
+    window.gameStore.exportGame();
   }
-}
+};
 
 // 处理导入游戏
 const handleImportGame = () => {
   // 直接调用全局的gameStore方法
   if (window.gameStore) {
-    window.gameStore.importGame()
+    window.gameStore.importGame();
   }
-}
+};
 </script>
 
 <style scoped lang="less">
-@import '@/styles/variable.less';
+@import "@/styles/variable.less";
 
-// 控制按钮共用样式
-.control-button {
+.control-buttons {
   position: fixed;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: #333;
-  border: 1px solid #555;
-  color: #888;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  &:hover {
-    background-color: #444;
-    transform: scale(1.05);
-  }
-}
-
-/* 一键重置游戏按钮 */
-.reset-game-toggle {
-  bottom: 15px;
-  right: 107px;
-  
-  &:hover {
-    color: #ff6666;
-    border-color: #ff6666;
-    box-shadow: 0 0 6px rgba(255, 102, 102, 0.5);
-  }
-}
-
-/* 导入导出控制按钮 */
-.import-export-toggle {
-  bottom: 15px;
-  right: 61px;
-}
-
-/* 暗黑模式切换按钮 */
-.dark-mode-toggle {
   bottom: 15px;
   right: 15px;
-}
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  .control-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #333;
+    border: 1px solid #555;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-/* 生产环境下的布局调整（没有导入导出按钮） */
-.import-export-toggle:not(:only-child) + .dark-mode-toggle {
-  .reset-game-toggle {
-    right: 61px;
-  }
-}
+    &:hover {
+      background-color: #444;
+      transform: scale(1.05);
+    }
 
-.import-export-toggle, .dark-mode-toggle {
-  &:hover {
-    color: @primary-color;
-    border-color: @primary-color;
-    box-shadow: 0 0 6px rgba(212, 175, 55, 0.5);
+    /* 一键重置游戏按钮 */
+    &.reset-game-toggle {
+      &:hover {
+        color: #ff6666;
+        border-color: #ff6666;
+        box-shadow: 0 0 6px rgba(255, 102, 102, 0.5);
+      }
+    }
+
+    &.import-export-toggle,
+    &.dark-mode-toggle {
+      &:hover {
+        color: @primary-color;
+        border-color: @primary-color;
+        box-shadow: 0 0 6px rgba(212, 175, 55, 0.5);
+      }
+    }
   }
 }
 
@@ -150,7 +153,7 @@ body.light-mode {
       background-color: #f0f0f0;
     }
   }
-  
+
   .reset-game-toggle {
     &:hover {
       color: #ff6666;
@@ -158,8 +161,9 @@ body.light-mode {
       box-shadow: 0 0 6px rgba(255, 102, 102, 0.3);
     }
   }
-  
-  .import-export-toggle, .dark-mode-toggle {
+
+  .import-export-toggle,
+  .dark-mode-toggle {
     &:hover {
       color: @light-primary-color;
       border-color: @light-primary-hover-color;
