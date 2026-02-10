@@ -30,6 +30,17 @@
     >
       {{ darkMode ? "🌙" : "☀️" }}
     </button>
+    
+    <!-- 手动触发天灾按钮（仅开发环境显示） -->
+    <button
+      v-if="isDev"
+      id="triggerDisasterToggle"
+      class="control-button trigger-disaster-toggle"
+      @click="triggerDisaster"
+      title="手动触发天灾"
+    >
+      ⚡
+    </button>
   </div>
 
   <!-- 导入导出模态框 -->
@@ -85,7 +96,24 @@ const handleExportGame = () => {
 const handleImportGame = () => {
   // 直接调用全局的gameStore方法
   if (window.gameStore) {
-    window.gameStore.importGame();
+    window.gameStore.importGame()
+  }
+};
+
+// 手动触发天灾
+const triggerDisaster = () => {
+  // 直接调用全局的gameStore方法
+  if (window.gameStore) {
+    // 随机选择触发火灾或猎物狂暴
+    const disasterType = Math.random() > 0.5 ? 'fire' : 'hunterRage';
+    if (disasterType === 'fire') {
+      window.gameStore.triggerFireDisaster();
+    } else if (window.gameStore.jobs.hunter > 0) {
+      window.gameStore.triggerHunterRageDisaster();
+    } else {
+      // 如果没有猎人，默认触发火灾
+      window.gameStore.triggerFireDisaster();
+    }
   }
 };
 </script>
@@ -138,6 +166,14 @@ const handleImportGame = () => {
         box-shadow: 0 0 6px rgba(212, 175, 55, 0.5);
       }
     }
+    
+    &.trigger-disaster-toggle {
+      &:hover {
+        color: #ff9900;
+        border-color: #ff9900;
+        box-shadow: 0 0 6px rgba(255, 153, 0, 0.5);
+      }
+    }
   }
 }
 
@@ -168,6 +204,14 @@ body.light-mode {
       color: @light-primary-color;
       border-color: @light-primary-hover-color;
       box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+    }
+  }
+  
+  .trigger-disaster-toggle {
+    &:hover {
+      color: #ff9900;
+      border-color: #ff9900;
+      box-shadow: 0 0 6px rgba(255, 153, 0, 0.5);
     }
   }
 }
