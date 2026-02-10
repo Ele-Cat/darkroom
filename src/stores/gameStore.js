@@ -44,7 +44,13 @@ export const useGameStore = defineStore('game', {
       nextDisasterTime: Math.floor(Math.random() * (defaultSettings.disaster.cd.max - defaultSettings.disaster.cd.min + 1)) + defaultSettings.disaster.cd.min, // 5-15分钟
       disasterActive: false // 标记是否有天灾正在显示
     },
-    logs: []
+    logs: [],
+    // 日志队列，用于延迟显示
+    logQueue: [],
+    // 日志队列处理定时器
+    logQueueTimer: null,
+    // 日志延迟时间（毫秒）
+    logDelayTime: 200
   }),
   getters: {
     canUnlockVillage: (state) => {
@@ -626,15 +632,48 @@ export const useGameStore = defineStore('game', {
       this.addLog('你采集了一些浆果')
     },
     addLog(message, type = 0) {
-      this.logs.unshift({
+      // 创建日志对象
+      const log = {
         id: Date.now() + Math.random().toString(36).substring(2),
         message: message,
         type: type
-      })
+      }
+      
+      // 将日志添加到队列
+      this.logQueue.push(log)
+      
+      // 如果没有正在处理的定时器，启动处理
+      if (!this.logQueueTimer) {
+        this.processLogQueue()
+      }
+    },
+    
+    // 处理日志队列
+    processLogQueue() {
+      if (this.logQueue.length === 0) {
+        // 队列为空，清除定时器
+        if (this.logQueueTimer) {
+          clearTimeout(this.logQueueTimer)
+          this.logQueueTimer = null
+        }
+        return
+      }
+      
+      // 取出队列中的第一个日志
+      const log = this.logQueue.shift()
+      
+      // 添加日志到显示列表
+      this.logs.unshift(log)
+      
       // 限制日志数量，最多保留50条
       if (this.logs.length > 50) {
         this.logs.pop()
       }
+      
+      // 设置定时器处理下一条日志
+      this.logQueueTimer = setTimeout(() => {
+        this.processLogQueue()
+      }, this.logDelayTime)
     },
     updateCooldowns(timeElapsed = 100) {
       // 计算实际需要执行的次数（基于100ms间隔）
@@ -856,6 +895,12 @@ export const useGameStore = defineStore('game', {
           stone: 0,
           trap: 0
         }
+        // 重置日志队列相关状态
+        this.logQueue = []
+        if (this.logQueueTimer) {
+          clearTimeout(this.logQueueTimer)
+          this.logQueueTimer = null
+        }
         this.addLog('游戏已重置', 1)
         this.saveGameState()
         // 初始化任务进场话术
@@ -929,6 +974,12 @@ export const useGameStore = defineStore('game', {
             wood: 0,
             stone: 0,
             trap: 0
+          }
+          // 重置日志队列相关状态
+          this.logQueue = []
+          if (this.logQueueTimer) {
+            clearTimeout(this.logQueueTimer)
+            this.logQueueTimer = null
           }
           this.addLog('游戏已加载', 1)
           // 如果村庄有小屋且人口未满，启动人口到达定时器
@@ -1008,6 +1059,12 @@ export const useGameStore = defineStore('game', {
             wood: 0,
             stone: 0,
             trap: 0
+          }
+          // 重置日志队列相关状态
+          this.logQueue = []
+          if (this.logQueueTimer) {
+            clearTimeout(this.logQueueTimer)
+            this.logQueueTimer = null
           }
           this.saveGameState()
           this.addLog('游戏已导入', 1)
