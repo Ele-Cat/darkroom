@@ -16,8 +16,6 @@
     <MouseContainer />
   </div>
   
-
-  
   <ControlContainer 
     :dark-mode="gameStore.darkMode"
     :is-dev="isDev"
@@ -37,6 +35,7 @@
 import { ref, onMounted, onUnmounted, watch, provide } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import eventBus from '@/utils/eventBus'
+import titleManager from '@/utils/titleManager'
 import LogsContainer from '@/layouts/LogsContainer.vue'
 import TabContainer from '@/layouts/TabContainer.vue'
 import HomeContainer from '@/layouts/HomeContainer.vue'
@@ -59,20 +58,7 @@ let gameLoopInterval = null
 
 // 更新浏览器标题
 const updateBrowserTitle = (tab) => {
-  const baseTitle = 'A dark room'
-  switch (tab) {
-    case 'cabin':
-      document.title = `${gameStore.fireLit ? '林中小屋' : '废弃小屋'} - ${baseTitle}`
-      break
-    case 'village':
-      document.title = `${gameStore.getVillageName()} - ${baseTitle}`
-      break
-    case 'explore':
-      document.title = `探索 - ${baseTitle}`
-      break
-    default:
-      document.title = baseTitle
-  }
+  titleManager.updateBrowserTitle(tab, gameStore, showDisasterModal.value)
 }
 
 // 切换tab
@@ -101,6 +87,9 @@ const toggleDarkMode = () => {
 const handleDisasterConfirm = () => {
   showDisasterModal.value = false
   
+  // 恢复原始标题
+  titleManager.restoreOriginalTitle()
+  
   // 触发灾难确认事件，让gameStore处理后续逻辑
   eventBus.emit('disasterConfirmed', {
     type: currentDisasterType.value,
@@ -109,16 +98,29 @@ const handleDisasterConfirm = () => {
 }
 
 // 监听灾难事件，显示灾难模态框
-eventBus.on('disasterOccurred', (disaster) => {
+const handleDisasterOccurred = (disaster) => {
   showDisasterModal.value = true
   currentDisasterType.value = disaster.type
   currentDisasterData.value = disaster.data
-})
+  
+  // 检查页面是否可见
+  if (!titleManager.isPageVisible()) {
+    titleManager.startTitleSwitch()
+  }
+}
 
-// 监听灾难确认事件，处理后续逻辑
-eventBus.on('disasterConfirmed', (disaster) => {
-  gameStore.handleDisasterConfirm(disaster)
-})
+// 监听页面可见性变化
+const handleVisibilityChange = () => {
+  if (showDisasterModal.value) {
+    if (titleManager.isPageVisible()) {
+      // 页面变为可见，停止标题切换
+      titleManager.restoreOriginalTitle()
+    } else {
+      // 页面变为不可见，开始标题切换
+      titleManager.startTitleSwitch()
+    }
+  }
+}
 
 // 更新暗黑模式类
 const updateDarkModeClass = () => {
@@ -155,6 +157,9 @@ onMounted(() => {
   // 更新暗黑模式
   updateDarkModeClass()
   
+  // 初始化标题管理器
+  titleManager.init()
+  
   // 初始化浏览器标题
   updateBrowserTitle(activeTab.value)
   
@@ -174,6 +179,17 @@ onMounted(() => {
       switchTab('village')
     }
   })
+  
+  // 监听灾难事件
+  eventBus.on('disasterOccurred', handleDisasterOccurred)
+  
+  // 监听灾难确认事件，处理后续逻辑
+  eventBus.on('disasterConfirmed', (disaster) => {
+    gameStore.handleDisasterConfirm(disaster)
+  })
+  
+  // 监听页面可见性变化
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 // 清理
@@ -181,6 +197,12 @@ onUnmounted(() => {
   if (gameLoopInterval) {
     clearTimeout(gameLoopInterval)
   }
+  
+  // 清理标题管理器
+  titleManager.cleanup()
+  
+  // 移除事件监听器
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 
 // 监听暗黑模式变化
@@ -200,4 +222,12 @@ watch(
     updateBrowserTitle(activeTab.value)
   }
 )
+
+// 监听弹框状态变化
+watch(showDisasterModal, (isVisible) => {
+  if (!isVisible) {
+    // 弹框关闭，清除标题切换
+    titleManager.restoreOriginalTitle()
+  }
+})
 </script>
