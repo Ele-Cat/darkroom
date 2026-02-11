@@ -21,12 +21,12 @@ import { ref, onMounted, onUnmounted, watch, provide } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import eventBus from '@/utils/eventBus'
 import titleManager from '@/utils/titleManager'
-import LogsContainer from '@/layouts/LogsContainer.vue'
-import TabContainer from '@/layouts/TabContainer.vue'
-import HomeContainer from '@/layouts/HomeContainer.vue'
-import MouseContainer from '@/layouts/MouseContainer.vue'
-import ControlContainer from '@/layouts/ControlContainer.vue'
-import DisasterModal from '@/layouts/modules/DisasterModal.vue'
+import LogsContainer from '@/layouts/LogsContainer/Index.vue'
+import TabContainer from '@/layouts/TabContainer/Index.vue'
+import HomeContainer from '@/layouts/HomeContainer/Index.vue'
+import MouseContainer from '@/layouts/MouseContainer/Index.vue'
+import ControlContainer from '@/layouts/ControlContainer/Index.vue'
+import DisasterModal from '@/layouts/DisasterModal/Index.vue'
 
 const gameStore = useGameStore()
 provide('gameStore', gameStore)

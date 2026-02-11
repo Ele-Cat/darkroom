@@ -57,7 +57,7 @@ export const useGameStore = defineStore('game', {
       return state.wood >= defaultSettings.village.unlockWoodCost && state.stone >= defaultSettings.village.unlockStoneCost
     },
     canShowExploreTab: (state) => {
-      return state.villageLevel >= 10
+      return state.villageLevel >= 10 && false
     },
     canShowVillageTab: (state) => {
       return state.villageTabVisible
@@ -374,7 +374,7 @@ export const useGameStore = defineStore('game', {
         this.wood -= woodCost
         this.stone -= stoneCost
         this.workshopUnlocked = true
-        this.addLog('你解锁了工坊，新增了制造功能', 1)
+        this.addLog('你解锁了工坊建筑', 1)
         this.saveGameState()
       } else if (this.workshopUnlocked) {
         this.addLog('工坊已经解锁', 1)

@@ -135,7 +135,7 @@ const defaultSettings = {
         woodCost: 30,
         stoneCost: 50,
         woodEfficiency: 10,
-        stoneEfficiency: 0
+        stoneEfficiency: 10
       }
     ]
   },
