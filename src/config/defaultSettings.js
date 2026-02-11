@@ -138,7 +138,7 @@ const defaultSettings = {
   disaster: {
     // 统一的天灾CD时间范围（分钟）
     cd: {
-      min: 5, // 最小CD时间（分钟）
+      min: 10, // 最小CD时间（分钟）
       max: 15 // 最大CD时间（分钟）
     },
     // 火灾天灾配置
@@ -149,7 +149,7 @@ const defaultSettings = {
     // 猎物狂暴天灾配置
     hunterRage: {
       minLoss: 1, // 最少损失的猎人数量
-      maxLossPercentage: 0.2 // 最多损失猎人总数的百分比
+      maxLossPercentage: 0.1 // 最多损失猎人总数的百分比
     }
   }
 }

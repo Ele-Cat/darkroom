@@ -50,7 +50,7 @@ export const useGameStore = defineStore('game', {
     // 日志队列处理定时器
     logQueueTimer: null,
     // 日志延迟时间（毫秒）
-    logDelayTime: 200
+    logDelayTime: 500
   }),
   getters: {
     canUnlockVillage: (state) => {
