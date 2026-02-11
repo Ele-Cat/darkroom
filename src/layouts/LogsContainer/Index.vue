@@ -3,7 +3,7 @@
     <div class="log-content" id="logContent" ref="logContentRef">
       <transition-group name="log" tag="div">
         <div 
-          v-for="log in logs" 
+          v-for="log in gameStore.logs" 
           :key="log.id"
           class="log-item"
           :class="{
@@ -20,19 +20,15 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, inject } from 'vue'
 
-const props = defineProps({
-  logs: {
-    type: Array,
-    required: true
-  }
-})
+// 从父组件注入gameStore
+const gameStore = inject('gameStore')
 
 const logContentRef = ref(null)
 
 // 监听logs变化，当有新log时滚动到顶部
-watch(() => props.logs.length, (newLength, oldLength) => {
+watch(() => gameStore.logs.length, (newLength, oldLength) => {
   if (newLength > oldLength && logContentRef.value) {
     logContentRef.value.scrollTop = 0
   }

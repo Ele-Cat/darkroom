@@ -13,27 +13,19 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted, inject } from 'vue'
+import eventBus from '@/utils/eventBus'
 
-const props = defineProps({
-  isVisible: {
-    type: Boolean,
-    default: false
-  },
-  disasterType: {
-    type: String,
-    default: ''
-  },
-  disasterData: {
-    type: Object,
-    default: () => ({})
-  }
-})
+// 从父组件注入依赖
+const titleManager = inject('titleManager')
 
-const emit = defineEmits(['confirm'])
+// 组件内部状态
+const isVisible = ref(false)
+const disasterType = ref('')
+const disasterData = ref({})
 
 const disasterTitle = computed(() => {
-  switch (props.disasterType) {
+  switch (disasterType.value) {
     case 'fire':
       return '🔥 火灾警报'
     case 'hunterRage':
@@ -44,19 +36,73 @@ const disasterTitle = computed(() => {
 })
 
 const disasterMessage = computed(() => {
-  switch (props.disasterType) {
+  switch (disasterType.value) {
     case 'fire':
-      return `村落发生火灾！烧掉了 ${props.disasterData.hutsBurned || 0} 个小屋，${props.disasterData.peopleLost || 0} 人不幸遇难。`
+      return `村落发生火灾！烧掉了 ${disasterData.value.hutsBurned || 0} 个小屋，${disasterData.value.peopleLost || 0} 人不幸遇难。`
     case 'hunterRage':
-      return `猎物突然狂暴！${props.disasterData.peopleLost || 0} 名猎人在狩猎过程中遭遇不幸。`
+      return `猎物突然狂暴！${disasterData.value.peopleLost || 0} 名猎人在狩猎过程中遭遇不幸。`
     default:
       return '村落遭遇天灾，请做好应对准备！'
   }
 })
 
+// 处理灾难确认
 const handleConfirm = () => {
-  emit('confirm')
+  // 恢复原始标题
+  titleManager.restoreOriginalTitle()
+  
+  // 触发灾难确认事件，让gameStore处理后续逻辑
+  eventBus.emit('disasterConfirmed', {
+    type: disasterType.value,
+    data: disasterData.value
+  })
+  
+  // 隐藏模态框
+  isVisible.value = false
 }
+
+// 监听灾难事件，显示灾难模态框
+const handleDisasterOccurred = (disaster) => {
+  isVisible.value = true
+  disasterType.value = disaster.type
+  disasterData.value = disaster.data
+  
+  // 检查页面是否可见
+  if (!titleManager.isPageVisible()) {
+    titleManager.startTitleSwitch()
+  }
+}
+
+// 监听页面可见性变化
+const handleVisibilityChange = () => {
+  if (isVisible.value) {
+    if (titleManager.isPageVisible()) {
+      // 页面变为可见，停止标题切换
+      titleManager.restoreOriginalTitle()
+    } else {
+      // 页面变为不可见，开始标题切换
+      titleManager.startTitleSwitch()
+    }
+  }
+}
+
+// 组件挂载时添加事件监听器
+onMounted(() => {
+  // 监听灾难事件
+  eventBus.on('disasterOccurred', handleDisasterOccurred)
+  
+  // 监听页面可见性变化
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+})
+
+// 组件卸载时移除事件监听器
+onUnmounted(() => {
+  // 移除灾难事件监听器
+  eventBus.off('disasterOccurred', handleDisasterOccurred)
+  
+  // 移除页面可见性变化监听器
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+})
 </script>
 
 <style scoped>

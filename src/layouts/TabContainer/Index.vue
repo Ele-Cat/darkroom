@@ -9,12 +9,12 @@
       {{ gameStore.fireLit ? '林中小屋' : '废弃小屋' }}
     </div>
     <div 
-      v-if="canShowVillageTab && gameStore.fireLit"
+      v-if="gameStore.fireLit"
       class="tab" 
-      :class="{ active: activeTab === 'village', locked: !gameStore.villageUnlocked, unlockable: !gameStore.villageUnlocked && gameStore.wood >= 10 && gameStore.stone >= 10 }"
+      :class="{ active: activeTab === 'village', locked: !gameStore.villageUnlocked, unlockable: !gameStore.villageUnlocked && gameStore.wood >= unlockWoodCost && gameStore.stone >= unlockStoneCost }"
       :data-tab="'village'"
       :data-locked="!gameStore.villageUnlocked"
-      :title="!gameStore.villageUnlocked ? (gameStore.wood >= 10 && gameStore.stone >= 10 ? '解锁' : `解锁还差 ${Math.max(10 - gameStore.wood, 0)} 木材和 ${Math.max(10 - gameStore.stone, 0)} 石头`) : ''"
+      :title="!gameStore.villageUnlocked ? (gameStore.wood >= unlockWoodCost && gameStore.stone >= unlockStoneCost ? '解锁' : `解锁还差 ${Math.max(unlockWoodCost - gameStore.wood, 0)} 木材和 ${Math.max(unlockStoneCost - gameStore.stone, 0)} 石头`) : ''"
       @click="switchTab('village')"
     >
       {{ gameStore.getVillageName() }}
@@ -23,7 +23,7 @@
       class="tab" 
       :class="{ active: activeTab === 'explore' }"
       :data-tab="'explore'"
-      :style="{ display: canShowExploreTab ? 'block' : 'none' }"
+      :style="{ display: gameStore.canShowExploreTab ? 'block' : 'none' }"
       @click="switchTab('explore')"
     >
       探索
@@ -32,30 +32,36 @@
 </template>
 
 <script setup>
-import { inject } from 'vue'
+import { inject, computed } from 'vue'
+import defaultSettings from '@/config/defaultSettings'
 
-// 接收gameStore实例
 const gameStore = inject('gameStore')
+const activeTab = inject('activeTab')
+const titleManager = inject('titleManager')
 
-const props = defineProps({
-  activeTab: {
-    type: String,
-    required: true
-  },
-  canShowExploreTab: {
-    type: Boolean,
-    required: true
-  },
-  canShowVillageTab: {
-    type: Boolean,
-    required: true
-  }
-})
+// 村落解锁配置
+const unlockWoodCost = computed(() => defaultSettings.village.unlockWoodCost)
+const unlockStoneCost = computed(() => defaultSettings.village.unlockStoneCost)
 
-const emit = defineEmits(['switch-tab'])
-
+// 切换tab
 const switchTab = (tab) => {
-  emit('switch-tab', tab)
+  if (tab === 'village' && !gameStore.villageUnlocked) {
+    if (gameStore.canUnlockVillage) {
+      gameStore.unlockVillage()
+      activeTab.value = tab
+      updateBrowserTitle(tab)
+    } else {
+      gameStore.addLog(`资源不足，需要${unlockWoodCost.value}木材和${unlockStoneCost.value}石头才能解锁村落`, 2)
+    }
+  } else {
+    activeTab.value = tab
+    updateBrowserTitle(tab)
+  }
+}
+
+// 更新浏览器标题
+const updateBrowserTitle = (tab) => {
+  titleManager.updateBrowserTitle(tab, gameStore)
 }
 </script>
 

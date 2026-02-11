@@ -40,20 +40,24 @@ export const useGameStore = defineStore('game', {
     resourceTimerCounter: 0,
     // 天灾系统
     disasterSystem: {
-      fireTimer: 0,
-      hunterRageTimer: 0,
-      nextFireTime: Math.floor(Math.random() * (15 - 10 + 1)) + 10, // 10-15分钟
-      nextHunterRageTime: Math.floor(Math.random() * (10 - 5 + 1)) + 5, // 5-10分钟
+      timer: 0,
+      nextDisasterTime: Math.floor(Math.random() * (defaultSettings.disaster.cd.max - defaultSettings.disaster.cd.min + 1)) + defaultSettings.disaster.cd.min, // 5-15分钟
       disasterActive: false // 标记是否有天灾正在显示
     },
-    logs: []
+    logs: [],
+    // 日志队列，用于延迟显示
+    logQueue: [],
+    // 日志队列处理定时器
+    logQueueTimer: null,
+    // 日志延迟时间（毫秒）
+    logDelayTime: 500
   }),
   getters: {
     canUnlockVillage: (state) => {
-      return state.wood >= 10 && state.stone >= 10
+      return state.wood >= defaultSettings.village.unlockWoodCost && state.stone >= defaultSettings.village.unlockStoneCost
     },
     canShowExploreTab: (state) => {
-      return state.villageLevel >= 10
+      return state.villageLevel >= 10 && false
     },
     canShowVillageTab: (state) => {
       return state.villageTabVisible
@@ -232,14 +236,16 @@ export const useGameStore = defineStore('game', {
       }
     },
     unlockVillage() {
-      if (this.wood >= 10 && this.stone >= 10) {
-        this.wood -= 10
-        this.stone -= 10
+      const unlockWoodCost = defaultSettings.village.unlockWoodCost
+      const unlockStoneCost = defaultSettings.village.unlockStoneCost
+      if (this.wood >= unlockWoodCost && this.stone >= unlockStoneCost) {
+        this.wood -= unlockWoodCost
+        this.stone -= unlockStoneCost
         this.villageUnlocked = true
-        this.addLog('你花费了10木材和10石头解锁了村落', 1)
+        this.addLog(`你解锁了村落，现在可以返回小屋管理它`, 1)
         this.saveGameState()
       } else {
-        this.addLog(`资源不足，需要10木材和10石头才能解锁村落`, 2)
+        this.addLog(`资源不足，需要${unlockWoodCost}木材和${unlockStoneCost}石头才能解锁村落`, 2)
       }
     },
     exploreVillage() {
@@ -368,7 +374,7 @@ export const useGameStore = defineStore('game', {
         this.wood -= woodCost
         this.stone -= stoneCost
         this.workshopUnlocked = true
-        this.addLog('你解锁了工坊，新增了制造功能', 1)
+        this.addLog('你解锁了工坊建筑', 1)
         this.saveGameState()
       } else if (this.workshopUnlocked) {
         this.addLog('工坊已经解锁', 1)
@@ -628,15 +634,48 @@ export const useGameStore = defineStore('game', {
       this.addLog('你采集了一些浆果')
     },
     addLog(message, type = 0) {
-      this.logs.unshift({
+      // 创建日志对象
+      const log = {
         id: Date.now() + Math.random().toString(36).substring(2),
         message: message,
         type: type
-      })
+      }
+      
+      // 将日志添加到队列
+      this.logQueue.push(log)
+      
+      // 如果没有正在处理的定时器，启动处理
+      if (!this.logQueueTimer) {
+        this.processLogQueue()
+      }
+    },
+    
+    // 处理日志队列
+    processLogQueue() {
+      if (this.logQueue.length === 0) {
+        // 队列为空，清除定时器
+        if (this.logQueueTimer) {
+          clearTimeout(this.logQueueTimer)
+          this.logQueueTimer = null
+        }
+        return
+      }
+      
+      // 取出队列中的第一个日志
+      const log = this.logQueue.shift()
+      
+      // 添加日志到显示列表
+      this.logs.unshift(log)
+      
       // 限制日志数量，最多保留50条
       if (this.logs.length > 50) {
         this.logs.pop()
       }
+      
+      // 设置定时器处理下一条日志
+      this.logQueueTimer = setTimeout(() => {
+        this.processLogQueue()
+      }, this.logDelayTime)
     },
     updateCooldowns(timeElapsed = 100) {
       // 计算实际需要执行的次数（基于100ms间隔）
@@ -682,21 +721,23 @@ export const useGameStore = defineStore('game', {
     
     // 更新天灾系统定时器
     updateDisasterTimers() {
-      // 火灾定时器（10-15分钟）
-      this.disasterSystem.fireTimer += 10 // 每次增加10秒
-      if (this.disasterSystem.fireTimer >= this.disasterSystem.nextFireTime * 60) {
-        this.disasterSystem.fireTimer = 0
-        this.disasterSystem.nextFireTime = Math.floor(Math.random() * (15 - 10 + 1)) + 10 // 重置为10-15分钟
-        this.triggerFireDisaster()
-      }
+      // 如果天灾正在显示，不更新定时器
+      if (this.disasterSystem.disasterActive) return
       
-      // 猎物狂暴定时器（5-10分钟）
-      if (this.jobs.hunter > 0) {
-        this.disasterSystem.hunterRageTimer += 10 // 每次增加10秒
-        if (this.disasterSystem.hunterRageTimer >= this.disasterSystem.nextHunterRageTime * 60) {
-          this.disasterSystem.hunterRageTimer = 0
-          this.disasterSystem.nextHunterRageTime = Math.floor(Math.random() * (10 - 5 + 1)) + 5 // 重置为5-10分钟
+      // 统一的天灾定时器（5-15分钟）
+      this.disasterSystem.timer += 10 // 每次增加10秒
+      if (this.disasterSystem.timer >= this.disasterSystem.nextDisasterTime * 60) {
+        this.disasterSystem.timer = 0
+        this.disasterSystem.nextDisasterTime = Math.floor(Math.random() * (defaultSettings.disaster.cd.max - defaultSettings.disaster.cd.min + 1)) + defaultSettings.disaster.cd.min // 重置为5-15分钟
+        
+        // 随机选择触发火灾或猎物狂暴
+        const hasHunters = this.jobs.hunter > 0
+        if (hasHunters && Math.random() > 0.5) {
+          // 有猎人且随机选择猎物狂暴
           this.triggerHunterRageDisaster()
+        } else {
+          // 触发火灾
+          this.triggerFireDisaster()
         }
       }
     },
@@ -710,10 +751,13 @@ export const useGameStore = defineStore('game', {
       this.disasterSystem.disasterActive = true
       
       // 计算烧掉的小屋数量（1-2个）
-      const hutsBurned = Math.floor(Math.random() * 2) + 1
+      const hutsBurned = Math.floor(Math.random() * (defaultSettings.disaster.fire.maxHutsBurned - defaultSettings.disaster.fire.minHutsBurned + 1)) + defaultSettings.disaster.fire.minHutsBurned
       // 计算需要去除的人员数量（每个小屋最多容纳的人数）
       const peoplePerCabin = defaultSettings.building.cabin.maxPopulationPerCabin
       const peopleToRemove = Math.min(hutsBurned * peoplePerCabin, this.population)
+      
+      // 减少小屋数量
+      this.villageLevel = Math.max(0, this.villageLevel - hutsBurned)
       
       if (peopleToRemove > 0) {
         // 先从闲散人员中去除
@@ -733,12 +777,38 @@ export const useGameStore = defineStore('game', {
           const totalJobPeople = totalJobs
           
           // 按比例减人
+          let remainingToRemoveAfterAllocation = remainingToRemove
+          const removalCounts = {}
+          
+          // 第一次分配：计算每个工种应减少的人数（向下取整）
           jobCounts.forEach(([jobId, count]) => {
             if (count > 0) {
               const removalCount = Math.floor((count / totalJobPeople) * remainingToRemove)
-              if (removalCount > 0) {
-                this.jobs[jobId] = Math.max(0, count - removalCount)
+              removalCounts[jobId] = removalCount
+              remainingToRemoveAfterAllocation -= removalCount
+            } else {
+              removalCounts[jobId] = 0
+            }
+          })
+          
+          // 第二次分配：处理剩余的人数（向上取整的余数）
+          if (remainingToRemoveAfterAllocation > 0) {
+            // 按人数比例排序，优先分配给人数多的工种
+            const sortedJobs = [...jobCounts].sort(([,a], [,b]) => b - a)
+            
+            // 分配剩余的人数
+            for (let i = 0; i < remainingToRemoveAfterAllocation && i < sortedJobs.length; i++) {
+              const [jobId] = sortedJobs[i]
+              if (this.jobs[jobId] > 0) {
+                removalCounts[jobId]++
               }
+            }
+          }
+          
+          // 应用减少的人数
+          Object.entries(removalCounts).forEach(([jobId, removalCount]) => {
+            if (removalCount > 0) {
+              this.jobs[jobId] = Math.max(0, this.jobs[jobId] - removalCount)
             }
           })
         }
@@ -765,8 +835,8 @@ export const useGameStore = defineStore('game', {
       this.disasterSystem.disasterActive = true
       
       // 计算丢失的猎人数量（至少1个，最多猎人总数的20%）
-      const minLoss = 1
-      const maxLoss = Math.ceil(this.jobs.hunter * 0.2)
+      const minLoss = defaultSettings.disaster.hunterRage.minLoss
+      const maxLoss = Math.ceil(this.jobs.hunter * defaultSettings.disaster.hunterRage.maxLossPercentage)
       const huntersLost = Math.floor(Math.random() * (maxLoss - minLoss + 1)) + minLoss
       
       // 减少猎人数量
@@ -786,6 +856,16 @@ export const useGameStore = defineStore('game', {
     handleDisasterConfirm(disaster) {
       // 标记天灾结束
       this.disasterSystem.disasterActive = false
+      
+      // 重置统一的天灾CD
+      this.disasterSystem.timer = 0
+      this.disasterSystem.nextDisasterTime = Math.floor(Math.random() * (defaultSettings.disaster.cd.max - defaultSettings.disaster.cd.min + 1)) + defaultSettings.disaster.cd.min // 重置为5-15分钟
+      
+      // 检查是否需要继续让人员来到村落
+      const maxPossiblePopulation = this.villageLevel * defaultSettings.building.cabin.maxPopulationPerCabin
+      if (this.villageLevel > 0 && this.population < maxPossiblePopulation) {
+        this.startPopulationArrival()
+      }
       
       switch (disaster.type) {
         case 'fire':
@@ -807,6 +887,11 @@ export const useGameStore = defineStore('game', {
       }
       this.saveGameState()
     },
+    initGameLog() {
+      this.addLog('🎯 任务：点燃火堆')
+      this.addLog('寒冷的夜晚即将来临，你需要收集木材并点燃火堆来取暖。')
+      this.addLog('提示：点击\'收集木材\'按钮获取木材，然后点击\'点燃火堆\'按钮生火。')
+    },
     resetGame() {
       if (confirm('⚠️ 警告：重置游戏将会清空所有游戏数据。此操作不可恢复！\n\n确定要重置游戏吗？')) {
         const currentDarkMode = this.darkMode
@@ -817,12 +902,16 @@ export const useGameStore = defineStore('game', {
           stone: 0,
           trap: 0
         }
+        // 重置日志队列相关状态
+        this.logQueue = []
+        if (this.logQueueTimer) {
+          clearTimeout(this.logQueueTimer)
+          this.logQueueTimer = null
+        }
         this.addLog('游戏已重置', 1)
         this.saveGameState()
         // 初始化任务进场话术
-        this.addLog('🎯 任务：点燃火堆')
-        this.addLog('寒冷的夜晚即将来临，你需要收集木材并点燃火堆来取暖。')
-        this.addLog('提示：点击\'收集木材\'按钮获取木材，然后点击\'点燃火堆\'按钮生火。')
+        this.initGameLog()
       }
     },
     saveGameState() {
@@ -890,6 +979,12 @@ export const useGameStore = defineStore('game', {
             wood: 0,
             stone: 0,
             trap: 0
+          }
+          // 重置日志队列相关状态
+          this.logQueue = []
+          if (this.logQueueTimer) {
+            clearTimeout(this.logQueueTimer)
+            this.logQueueTimer = null
           }
           this.addLog('游戏已加载', 1)
           // 如果村庄有小屋且人口未满，启动人口到达定时器
@@ -969,6 +1064,12 @@ export const useGameStore = defineStore('game', {
             wood: 0,
             stone: 0,
             trap: 0
+          }
+          // 重置日志队列相关状态
+          this.logQueue = []
+          if (this.logQueueTimer) {
+            clearTimeout(this.logQueueTimer)
+            this.logQueueTimer = null
           }
           this.saveGameState()
           this.addLog('游戏已导入', 1)
