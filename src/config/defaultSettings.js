@@ -1,5 +1,10 @@
 // 系统配置项
 const defaultSettings = {
+  // 村落解锁配置
+  village: {
+    unlockWoodCost: 10, // 解锁村落需要的木材
+    unlockStoneCost: 10 // 解锁村落需要的石头
+  },
   // 收集配置
   collection: {
     // 木材配置
@@ -44,15 +49,10 @@ const defaultSettings = {
   },
   // 人口配置
   population: {
-    arrivalTimeMin: 5, // 人口到达最小时间（秒）
+    arrivalTimeMin: 10, // 人口到达最小时间（秒）
     arrivalTimeMax: 30, // 人口到达最大时间（秒）
     arrivalCountMin: 1, // 每次到达最小人数
     arrivalCountMax: 3 // 每次到达最大人数
-  },
-  // 村落解锁配置
-  village: {
-    unlockWoodCost: 10, // 解锁村落需要的木材
-    unlockStoneCost: 10 // 解锁村落需要的石头
   },
   // Buff配置
   buffs: {
