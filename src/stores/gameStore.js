@@ -885,6 +885,11 @@ export const useGameStore = defineStore('game', {
       }
       this.saveGameState()
     },
+    initGameLog() {
+      this.addLog('🎯 任务：点燃火堆')
+      this.addLog('寒冷的夜晚即将来临，你需要收集木材并点燃火堆来取暖。')
+      this.addLog('提示：点击\'收集木材\'按钮获取木材，然后点击\'点燃火堆\'按钮生火。')
+    },
     resetGame() {
       if (confirm('⚠️ 警告：重置游戏将会清空所有游戏数据。此操作不可恢复！\n\n确定要重置游戏吗？')) {
         const currentDarkMode = this.darkMode
@@ -904,9 +909,7 @@ export const useGameStore = defineStore('game', {
         this.addLog('游戏已重置', 1)
         this.saveGameState()
         // 初始化任务进场话术
-        this.addLog('🎯 任务：点燃火堆')
-        this.addLog('寒冷的夜晚即将来临，你需要收集木材并点燃火堆来取暖。')
-        this.addLog('提示：点击\'收集木材\'按钮获取木材，然后点击\'点燃火堆\'按钮生火。')
+        this.initGameLog()
       }
     },
     saveGameState() {

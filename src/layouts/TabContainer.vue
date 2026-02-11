@@ -9,7 +9,7 @@
       {{ gameStore.fireLit ? '林中小屋' : '废弃小屋' }}
     </div>
     <div 
-      v-if="canShowVillageTab && gameStore.fireLit"
+      v-if="gameStore.fireLit"
       class="tab" 
       :class="{ active: activeTab === 'village', locked: !gameStore.villageUnlocked, unlockable: !gameStore.villageUnlocked && gameStore.wood >= 10 && gameStore.stone >= 10 }"
       :data-tab="'village'"
@@ -23,7 +23,7 @@
       class="tab" 
       :class="{ active: activeTab === 'explore' }"
       :data-tab="'explore'"
-      :style="{ display: canShowExploreTab ? 'block' : 'none' }"
+      :style="{ display: gameStore.canShowExploreTab ? 'block' : 'none' }"
       @click="switchTab('explore')"
     >
       探索
@@ -34,28 +34,29 @@
 <script setup>
 import { inject } from 'vue'
 
-// 接收gameStore实例
 const gameStore = inject('gameStore')
+const activeTab = inject('activeTab')
+const titleManager = inject('titleManager')
 
-const props = defineProps({
-  activeTab: {
-    type: String,
-    required: true
-  },
-  canShowExploreTab: {
-    type: Boolean,
-    required: true
-  },
-  canShowVillageTab: {
-    type: Boolean,
-    required: true
-  }
-})
-
-const emit = defineEmits(['switch-tab'])
-
+// 切换tab
 const switchTab = (tab) => {
-  emit('switch-tab', tab)
+  if (tab === 'village' && !gameStore.villageUnlocked) {
+    if (gameStore.canUnlockVillage) {
+      gameStore.unlockVillage()
+      activeTab.value = tab
+      updateBrowserTitle(tab)
+    } else {
+      gameStore.addLog(`资源不足，需要10木材和10石头才能解锁村落`, 2)
+    }
+  } else {
+    activeTab.value = tab
+    updateBrowserTitle(tab)
+  }
+}
+
+// 更新浏览器标题
+const updateBrowserTitle = (tab) => {
+  titleManager.updateBrowserTitle(tab, gameStore)
 }
 </script>
 

@@ -26,9 +26,9 @@
       id="darkModeToggle"
       class="control-button dark-mode-toggle"
       @click="toggleDarkMode"
-      :title="darkMode ? '切换为亮色模式' : '切换为暗黑模式'"
+      :title="gameStore.darkMode ? '切换为亮色模式' : '切换为暗黑模式'"
     >
-      {{ darkMode ? "🌙" : "☀️" }}
+      {{ gameStore.darkMode ? "🌙" : "☀️" }}
     </button>
     
     <!-- 手动触发天灾按钮（仅开发环境显示） -->
@@ -54,36 +54,49 @@
 </template>
 
 <script setup>
-import { inject, ref } from "vue";
+import { inject, ref, watch } from "vue";
 import ImportExportModal from "@/components/ImportExportModal.vue";
+
 const gameStore = inject('gameStore')
 
-const props = defineProps({
-  darkMode: {
-    type: Boolean,
-    required: true,
-  },
-  isDev: {
-    type: Boolean,
-    default: false,
-  },
-});
 
-const emit = defineEmits(["reset-game", "toggle-dark-mode"]);
+// 检查是否为开发环境
+const isDev = import.meta.env.VITE_APP_ENV === 'development'
 
 const showImportExportModal = ref(false);
 
+// 重置游戏
 const resetGame = () => {
-  emit("reset-game");
+  gameStore.resetGame()
 };
 
+// 打开导入导出模态框
 const openImportExport = () => {
   showImportExportModal.value = true;
 };
 
+// 切换暗黑模式
 const toggleDarkMode = () => {
-  emit("toggle-dark-mode");
+  gameStore.toggleDarkMode()
+  updateDarkModeClass()
 };
+
+// 更新暗黑模式类
+const updateDarkModeClass = () => {
+  if (gameStore.darkMode) {
+    document.body.classList.remove('light-mode')
+  } else {
+    document.body.classList.add('light-mode')
+  }
+};
+
+watch(() => gameStore.darkMode, (newDarkMode) => {
+  if (newDarkMode) {
+    document.body.classList.remove('light-mode')
+  } else {
+    document.body.classList.add('light-mode')
+  }
+})
 
 // 处理导出游戏
 const handleExportGame = () => {
