@@ -49,6 +49,11 @@ const defaultSettings = {
     arrivalCountMin: 1, // 每次到达最小人数
     arrivalCountMax: 3 // 每次到达最大人数
   },
+  // 村落解锁配置
+  village: {
+    unlockWoodCost: 10, // 解锁村落需要的木材
+    unlockStoneCost: 10 // 解锁村落需要的石头
+  },
   // Buff配置
   buffs: {
     // 货车buff

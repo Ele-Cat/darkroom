@@ -11,10 +11,10 @@
     <div 
       v-if="gameStore.fireLit"
       class="tab" 
-      :class="{ active: activeTab === 'village', locked: !gameStore.villageUnlocked, unlockable: !gameStore.villageUnlocked && gameStore.wood >= 10 && gameStore.stone >= 10 }"
+      :class="{ active: activeTab === 'village', locked: !gameStore.villageUnlocked, unlockable: !gameStore.villageUnlocked && gameStore.wood >= unlockWoodCost && gameStore.stone >= unlockStoneCost }"
       :data-tab="'village'"
       :data-locked="!gameStore.villageUnlocked"
-      :title="!gameStore.villageUnlocked ? (gameStore.wood >= 10 && gameStore.stone >= 10 ? '解锁' : `解锁还差 ${Math.max(10 - gameStore.wood, 0)} 木材和 ${Math.max(10 - gameStore.stone, 0)} 石头`) : ''"
+      :title="!gameStore.villageUnlocked ? (gameStore.wood >= unlockWoodCost && gameStore.stone >= unlockStoneCost ? '解锁' : `解锁还差 ${Math.max(unlockWoodCost - gameStore.wood, 0)} 木材和 ${Math.max(unlockStoneCost - gameStore.stone, 0)} 石头`) : ''"
       @click="switchTab('village')"
     >
       {{ gameStore.getVillageName() }}
@@ -32,11 +32,16 @@
 </template>
 
 <script setup>
-import { inject } from 'vue'
+import { inject, computed } from 'vue'
+import defaultSettings from '@/config/defaultSettings'
 
 const gameStore = inject('gameStore')
 const activeTab = inject('activeTab')
 const titleManager = inject('titleManager')
+
+// 村落解锁配置
+const unlockWoodCost = computed(() => defaultSettings.village.unlockWoodCost)
+const unlockStoneCost = computed(() => defaultSettings.village.unlockStoneCost)
 
 // 切换tab
 const switchTab = (tab) => {
@@ -46,7 +51,7 @@ const switchTab = (tab) => {
       activeTab.value = tab
       updateBrowserTitle(tab)
     } else {
-      gameStore.addLog(`资源不足，需要10木材和10石头才能解锁村落`, 2)
+      gameStore.addLog(`资源不足，需要${unlockWoodCost.value}木材和${unlockStoneCost.value}石头才能解锁村落`, 2)
     }
   } else {
     activeTab.value = tab

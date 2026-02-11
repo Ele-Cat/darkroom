@@ -54,7 +54,7 @@ export const useGameStore = defineStore('game', {
   }),
   getters: {
     canUnlockVillage: (state) => {
-      return state.wood >= 10 && state.stone >= 10
+      return state.wood >= defaultSettings.village.unlockWoodCost && state.stone >= defaultSettings.village.unlockStoneCost
     },
     canShowExploreTab: (state) => {
       return state.villageLevel >= 10
@@ -236,14 +236,16 @@ export const useGameStore = defineStore('game', {
       }
     },
     unlockVillage() {
-      if (this.wood >= 10 && this.stone >= 10) {
-        this.wood -= 10
-        this.stone -= 10
+      const unlockWoodCost = defaultSettings.village.unlockWoodCost
+      const unlockStoneCost = defaultSettings.village.unlockStoneCost
+      if (this.wood >= unlockWoodCost && this.stone >= unlockStoneCost) {
+        this.wood -= unlockWoodCost
+        this.stone -= unlockStoneCost
         this.villageUnlocked = true
-        this.addLog('你花费了10木材和10石头解锁了村落', 1)
+        this.addLog(`你解锁了村落，现在可以返回小屋管理它`, 1)
         this.saveGameState()
       } else {
-        this.addLog(`资源不足，需要10木材和10石头才能解锁村落`, 2)
+        this.addLog(`资源不足，需要${unlockWoodCost}木材和${unlockStoneCost}石头才能解锁村落`, 2)
       }
     },
     exploreVillage() {
