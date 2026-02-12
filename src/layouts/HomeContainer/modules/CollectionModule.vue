@@ -110,7 +110,7 @@ const getFireButtonClass = () => {
   bottom: 0;
   left: 20%;
   transform: translateX(-50%);
-  width: 6px;
+  width: 8px;
   height: 9px;
   background: radial-gradient(ellipse at bottom, #ff6b35 0%, #ff4500 50%, #8B0000 100%);
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
@@ -133,7 +133,7 @@ const getFireButtonClass = () => {
   bottom: 0;
   left: 20%;
   transform: translateX(-50%);
-  width: 8px;
+  width: 10px;
   height: 12px;
   background: radial-gradient(ellipse at bottom, #ff8c42 0%, #ff6b35 50%, #cc3300 100%);
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
@@ -156,7 +156,7 @@ const getFireButtonClass = () => {
   bottom: 0;
   left: 20%;
   transform: translateX(-50%);
-  width: 10px;
+  width: 13px;
   height: 15px;
   background: radial-gradient(ellipse at bottom, #ffa500 0%, #ff8c00 50%, #ff4500 100%);
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
@@ -179,7 +179,7 @@ const getFireButtonClass = () => {
   bottom: 0;
   left: 20%;
   transform: translateX(-50%);
-  width: 12px;
+  width: 16px;
   height: 18px;
   background: radial-gradient(ellipse at bottom, #ffcc00 0%, #ffa500 50%, #ff4500 100%);
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
