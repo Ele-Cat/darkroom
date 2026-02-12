@@ -34,7 +34,6 @@ const defaultSettings = {
     cart: {
       woodCost: 20, // 解锁货车需要的木材
       resourceIncrease: 2, // 每十秒增加的资源数量
-      interval: 10 // 增加资源的间隔（秒）
     },
     // 陷阱配置
     trap: {
@@ -107,6 +106,17 @@ const defaultSettings = {
     cabin: {
       woodCost: 250, // 解锁需要的木材
       stoneCost: 250, // 解锁需要的石头
+      furCost: 10, // 解锁需要的毛皮
+      meatCost: 10, // 解锁需要的生肉
+      unlockLevel: 2 // 解锁需要的小屋等级
+    }
+  },
+  // 熏肉小屋配置
+  smokehouse: {
+    cabin: {
+      woodCost: 300, // 解锁需要的木材
+      stoneCost: 300, // 解锁需要的石头
+      meatCost: 50, // 解锁需要的生肉
       unlockLevel: 3 // 解锁需要的小屋等级
     }
   },
@@ -115,6 +125,17 @@ const defaultSettings = {
     cabin: {
       woodCost: 350, // 解锁需要的木材
       stoneCost: 350, // 解锁需要的石头
+      furCost: 50, // 解锁需要的毛皮
+      unlockLevel: 5 // 解锁需要的小屋等级
+    }
+  },
+  // 贸易站配置
+  tradingPost: {
+    cabin: {
+      woodCost: 400, // 解锁需要的木材
+      stoneCost: 400, // 解锁需要的石头
+      meatCost: 100, // 解锁需要的生肉
+      furCost: 100, // 解锁需要的毛皮
       unlockLevel: 5 // 解锁需要的小屋等级
     }
   },
@@ -123,6 +144,7 @@ const defaultSettings = {
     cabin: {
       woodCost: 500, // 解锁需要的木材
       stoneCost: 500, // 解锁需要的石头
+      baconCost: 100, // 解锁需要的熏肉
       unlockLevel: 7 // 解锁需要的小屋等级
     }
   },
@@ -132,10 +154,10 @@ const defaultSettings = {
       {
         id: 'stoneAxe',
         name: '石斧',
-        woodCost: 30,
-        stoneCost: 50,
-        woodEfficiency: 10,
-        stoneEfficiency: 10
+        woodCost: 300,
+        stoneCost: 500,
+        woodEfficiency: 30,
+        stoneEfficiency: 30
       }
     ]
   },

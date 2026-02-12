@@ -33,7 +33,9 @@ export const useGameStore = defineStore('game', {
     populationTimer: null,
     cartUnlocked: false,
     huntingCabinUnlocked: false,
+    smokehouseCabinUnlocked: false, // 熏肉小屋是否解锁
     tanneryCabinUnlocked: false,
+    tradingPostUnlocked: false, // 贸易站是否解锁
     workshopUnlocked: false,
     stoneAxeUnlocked: false,
     jobModuleUnlocked: false,
@@ -43,6 +45,7 @@ export const useGameStore = defineStore('game', {
       miner: 0,
       hunter: 0,
       butcher: 0,
+      smoker: 0, // 熏肉师
       tanner: 0
     },
     cooldowns: {
@@ -203,7 +206,7 @@ export const useGameStore = defineStore('game', {
       if (this.cooldowns.wood <= 0) {
         let woodAmount = defaultSettings.collection.wood.amount
         if (this.cartUnlocked) {
-          woodAmount += 5
+          woodAmount += 15
         }
         if (this.stoneAxeUnlocked) {
           woodAmount += defaultSettings.crafting.tools.find(tool => tool.id === 'stoneAxe').woodEfficiency
@@ -218,7 +221,7 @@ export const useGameStore = defineStore('game', {
       if (this.cooldowns.stone <= 0) {
         let stoneAmount = defaultSettings.collection.stone.amount
         if (this.cartUnlocked) {
-          stoneAmount += 5
+          stoneAmount += 15
         }
         if (this.stoneAxeUnlocked) {
           stoneAmount += defaultSettings.crafting.tools.find(tool => tool.id === 'stoneAxe').stoneEfficiency
@@ -365,7 +368,7 @@ export const useGameStore = defineStore('game', {
       if (!this.cartUnlocked && this.wood >= woodCost) {
         this.wood -= woodCost
         this.cartUnlocked = true
-        this.addLog('解锁货车，手动收集翻倍，每十秒自动增加木材和石头', 1)
+        this.addLog('解锁货车，手动收集效率更高，每十秒自动增加木材和石头', 1)
         this.saveGameState()
       } else if (this.cartUnlocked) {
         this.addLog('货车已经解锁', 1)
@@ -381,16 +384,42 @@ export const useGameStore = defineStore('game', {
       
       const woodCost = defaultSettings.hunting.cabin.woodCost
       const stoneCost = defaultSettings.hunting.cabin.stoneCost
-      if (!this.huntingCabinUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
+      const furCost = defaultSettings.hunting.cabin.furCost
+      const meatCost = defaultSettings.hunting.cabin.meatCost
+      if (!this.huntingCabinUnlocked && this.wood >= woodCost && this.stone >= stoneCost && this.fur >= furCost && this.meat >= meatCost) {
         this.wood -= woodCost
         this.stone -= stoneCost
+        this.fur -= furCost
+        this.meat -= meatCost
         this.huntingCabinUnlocked = true
-        this.addLog('你解锁了狩猎小屋，新增了猎人和熏肉师工作', 1)
+        this.addLog('你解锁了狩猎小屋，新增了猎人工作', 1)
         this.saveGameState()
       } else if (this.huntingCabinUnlocked) {
         this.addLog('狩猎小屋已经解锁', 1)
       } else {
         this.addLog('资源不足，无法解锁狩猎小屋', 2)
+      }
+    },
+    
+    // 解锁熏肉小屋
+    unlockSmokehouseCabin() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('解锁操作')) return
+      
+      const woodCost = defaultSettings.smokehouse.cabin.woodCost
+      const stoneCost = defaultSettings.smokehouse.cabin.stoneCost
+      const meatCost = defaultSettings.smokehouse.cabin.meatCost
+      if (!this.smokehouseCabinUnlocked && this.wood >= woodCost && this.stone >= stoneCost && this.meat >= meatCost) {
+        this.wood -= woodCost
+        this.stone -= stoneCost
+        this.meat -= meatCost
+        this.smokehouseCabinUnlocked = true
+        this.addLog('你解锁了熏肉小屋，新增了熏肉师工作', 1)
+        this.saveGameState()
+      } else if (this.smokehouseCabinUnlocked) {
+        this.addLog('熏肉小屋已经解锁', 1)
+      } else {
+        this.addLog('资源不足，无法解锁熏肉小屋', 2)
       }
     },
     
@@ -401,9 +430,11 @@ export const useGameStore = defineStore('game', {
       
       const woodCost = defaultSettings.tannery.cabin.woodCost
       const stoneCost = defaultSettings.tannery.cabin.stoneCost
-      if (!this.tanneryCabinUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
+      const furCost = defaultSettings.tannery.cabin.furCost
+      if (!this.tanneryCabinUnlocked && this.wood >= woodCost && this.stone >= stoneCost && this.fur >= furCost) {
         this.wood -= woodCost
         this.stone -= stoneCost
+        this.fur -= furCost
         this.tanneryCabinUnlocked = true
         this.addLog('你解锁了制革小屋，新增了皮革师工作', 1)
         this.saveGameState()
@@ -414,6 +445,30 @@ export const useGameStore = defineStore('game', {
       }
     },
     
+    // 解锁贸易站
+    unlockTradingPost() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('解锁操作')) return
+      
+      const woodCost = defaultSettings.tradingPost.cabin.woodCost
+      const stoneCost = defaultSettings.tradingPost.cabin.stoneCost
+      const meatCost = defaultSettings.tradingPost.cabin.meatCost
+      const furCost = defaultSettings.tradingPost.cabin.furCost
+      if (!this.tradingPostUnlocked && this.wood >= woodCost && this.stone >= stoneCost && this.meat >= meatCost && this.fur >= furCost) {
+        this.wood -= woodCost
+        this.stone -= stoneCost
+        this.meat -= meatCost
+        this.fur -= furCost
+        this.tradingPostUnlocked = true
+        this.addLog('你解锁了贸易站，可以购买物品', 1)
+        this.saveGameState()
+      } else if (this.tradingPostUnlocked) {
+        this.addLog('贸易站已经解锁', 1)
+      } else {
+        this.addLog('资源不足，无法解锁贸易站', 2)
+      }
+    },
+    
     // 解锁工坊
     unlockWorkshop() {
       // 检查火堆是否熄灭
@@ -421,9 +476,11 @@ export const useGameStore = defineStore('game', {
       
       const woodCost = defaultSettings.workshop.cabin.woodCost
       const stoneCost = defaultSettings.workshop.cabin.stoneCost
-      if (!this.workshopUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
+      const baconCost = defaultSettings.workshop.cabin.baconCost
+      if (!this.workshopUnlocked && this.wood >= woodCost && this.stone >= stoneCost && this.bacon >= baconCost) {
         this.wood -= woodCost
         this.stone -= stoneCost
+        this.bacon -= baconCost
         this.workshopUnlocked = true
         this.addLog('你解锁了工坊建筑', 1)
         this.saveGameState()
@@ -506,7 +563,7 @@ export const useGameStore = defineStore('game', {
           }
         }
         // 熏肉师生产熏肉（消耗生肉和木材）
-        if (this.jobs.butcher > 0 && this.huntingCabinUnlocked) {
+        if (this.jobs.butcher > 0 && this.smokehouseCabinUnlocked) {
           const butcherBuff = defaultSettings.jobs.types.find(job => job.id === 'butcher')
           if (butcherBuff) {
             // 检查是否有足够的资源
@@ -1010,7 +1067,9 @@ export const useGameStore = defineStore('game', {
           population: this.population,
           cartUnlocked: this.cartUnlocked,
           huntingCabinUnlocked: this.huntingCabinUnlocked,
+          smokehouseCabinUnlocked: this.smokehouseCabinUnlocked,
           tanneryCabinUnlocked: this.tanneryCabinUnlocked,
+          tradingPostUnlocked: this.tradingPostUnlocked,
           workshopUnlocked: this.workshopUnlocked,
           stoneAxeUnlocked: this.stoneAxeUnlocked,
           jobModuleUnlocked: this.jobModuleUnlocked,
@@ -1044,7 +1103,9 @@ export const useGameStore = defineStore('game', {
           this.population = loadedState.population || 0
           this.cartUnlocked = loadedState.cartUnlocked || false
           this.huntingCabinUnlocked = loadedState.huntingCabinUnlocked || false
+          this.smokehouseCabinUnlocked = loadedState.smokehouseCabinUnlocked || false
           this.tanneryCabinUnlocked = loadedState.tanneryCabinUnlocked || false
+          this.tradingPostUnlocked = loadedState.tradingPostUnlocked || false
           this.workshopUnlocked = loadedState.workshopUnlocked || false
           this.stoneAxeUnlocked = loadedState.stoneAxeUnlocked || false
           this.jobModuleUnlocked = loadedState.jobModuleUnlocked || false
@@ -1096,7 +1157,9 @@ export const useGameStore = defineStore('game', {
           population: this.population,
           cartUnlocked: this.cartUnlocked,
           huntingCabinUnlocked: this.huntingCabinUnlocked,
+          smokehouseCabinUnlocked: this.smokehouseCabinUnlocked,
           tanneryCabinUnlocked: this.tanneryCabinUnlocked,
+          tradingPostUnlocked: this.tradingPostUnlocked,
           jobModuleUnlocked: this.jobModuleUnlocked,
           traps: this.traps,
           jobs: this.jobs
@@ -1130,7 +1193,9 @@ export const useGameStore = defineStore('game', {
           this.population = loadedState.population || 0
           this.cartUnlocked = loadedState.cartUnlocked || false
           this.huntingCabinUnlocked = loadedState.huntingCabinUnlocked || false
+          this.smokehouseCabinUnlocked = loadedState.smokehouseCabinUnlocked || false
           this.tanneryCabinUnlocked = loadedState.tanneryCabinUnlocked || false
+          this.tradingPostUnlocked = loadedState.tradingPostUnlocked || false
           this.workshopUnlocked = loadedState.workshopUnlocked || false
           this.stoneAxeUnlocked = loadedState.stoneAxeUnlocked || false
           this.jobModuleUnlocked = loadedState.jobModuleUnlocked || false

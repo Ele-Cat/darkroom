@@ -31,6 +31,16 @@
         @button-click="unlockHuntingCabin"
       />
       
+      <!-- 熏肉小屋按钮 -->
+      <TooltipButton 
+        v-if="gameStore.huntingCabinUnlocked && gameStore.villageLevel >= defaultSettings.smokehouse.cabin.unlockLevel"
+        button-id="unlockSmokehouseCabin"
+        button-text="熏肉小屋"
+        :tooltip-text="getSmokehouseCabinTooltip()"
+        :disabled="gameStore.smokehouseCabinUnlocked"
+        @button-click="unlockSmokehouseCabin"
+      />
+      
       <!-- 制革小屋按钮 -->
       <TooltipButton 
         v-if="gameStore.villageLevel >= defaultSettings.tannery.cabin.unlockLevel"
@@ -39,6 +49,16 @@
         :tooltip-text="getTanneryCabinTooltip()"
         :disabled="gameStore.tanneryCabinUnlocked"
         @button-click="unlockTanneryCabin"
+      />
+      
+      <!-- 贸易站按钮 -->
+      <TooltipButton 
+        v-if="gameStore.villageLevel >= defaultSettings.tradingPost.cabin.unlockLevel"
+        button-id="unlockTradingPost"
+        button-text="贸易站"
+        :tooltip-text="getTradingPostTooltip()"
+        :disabled="gameStore.tradingPostUnlocked"
+        @button-click="unlockTradingPost"
       />
       
       <!-- 工坊按钮 -->
@@ -82,6 +102,14 @@ const unlockWorkshop = () => {
   gameStore.unlockWorkshop()
 }
 
+const unlockSmokehouseCabin = () => {
+  gameStore.unlockSmokehouseCabin()
+}
+
+const unlockTradingPost = () => {
+  gameStore.unlockTradingPost()
+}
+
 const getBuildCostTooltip = () => {
   const baseWoodCost = defaultSettings.building.cabin.baseWoodCost
   const baseStoneCost = defaultSettings.building.cabin.baseStoneCost
@@ -111,15 +139,23 @@ const getTrapTooltip = () => {
 }
 
 const getHuntingCabinTooltip = () => {
-  return `木材 ${defaultSettings.hunting.cabin.woodCost}, 石头 ${defaultSettings.hunting.cabin.stoneCost}`
+  return `木材 ${defaultSettings.hunting.cabin.woodCost}, 石头 ${defaultSettings.hunting.cabin.stoneCost}, 毛皮 ${defaultSettings.hunting.cabin.furCost}, 生肉 ${defaultSettings.hunting.cabin.meatCost}`
 }
 
 const getTanneryCabinTooltip = () => {
-  return `木材 ${defaultSettings.tannery.cabin.woodCost}, 石头 ${defaultSettings.tannery.cabin.stoneCost}`
+  return `木材 ${defaultSettings.tannery.cabin.woodCost}, 石头 ${defaultSettings.tannery.cabin.stoneCost}, 毛皮 ${defaultSettings.tannery.cabin.furCost}`
 }
 
 const getWorkshopTooltip = () => {
-  return `木材 ${defaultSettings.workshop.cabin.woodCost}, 石头 ${defaultSettings.workshop.cabin.stoneCost}`
+  return `木材 ${defaultSettings.workshop.cabin.woodCost}, 石头 ${defaultSettings.workshop.cabin.stoneCost}, 熏肉 ${defaultSettings.workshop.cabin.baconCost}`
+}
+
+const getSmokehouseCabinTooltip = () => {
+  return `木材 ${defaultSettings.smokehouse.cabin.woodCost}, 石头 ${defaultSettings.smokehouse.cabin.stoneCost}, 生肉 ${defaultSettings.smokehouse.cabin.meatCost}`
+}
+
+const getTradingPostTooltip = () => {
+  return `木材 ${defaultSettings.tradingPost.cabin.woodCost}, 石头 ${defaultSettings.tradingPost.cabin.stoneCost}, 生肉 ${defaultSettings.tradingPost.cabin.meatCost}, 毛皮 ${defaultSettings.tradingPost.cabin.furCost}`
 }
 </script>
 

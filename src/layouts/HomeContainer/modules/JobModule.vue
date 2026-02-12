@@ -68,8 +68,12 @@ const activeTooltip = ref(null);
 // 工种类型
 const jobTypes = computed(() => {
   return defaultSettings.jobs.types.filter(job => {
-    // 如果狩猎小屋未解锁，过滤掉猎人、熏肉师
-    if (!gameStore.huntingCabinUnlocked && (job.id === 'hunter' || job.id === 'butcher')) {
+    // 如果狩猎小屋未解锁，过滤掉猎人
+    if (!gameStore.huntingCabinUnlocked && job.id === 'hunter') {
+      return false;
+    }
+    // 如果熏肉小屋未解锁，过滤掉熏肉师
+    if (!gameStore.smokehouseCabinUnlocked && job.id === 'butcher') {
       return false;
     }
     // 如果制革小屋未解锁，过滤掉皮革师
