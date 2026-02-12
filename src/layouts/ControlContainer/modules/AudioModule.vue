@@ -11,6 +11,7 @@
 
   <!-- 音频启用按钮 -->
   <ControlButton
+    v-if="isDev"
     buttonId="audioEnableToggle"
     buttonClass="trigger-disaster-toggle"
     :isActive="audioEnabled"
