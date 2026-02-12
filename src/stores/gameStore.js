@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import defaultSettings from '@/config/defaultSettings'
 import eventBus from '@/utils/eventBus'
+import audioPlayer from '@/utils/audioPlayer'
 
 export const useGameStore = defineStore('game', {
   state: () => ({
@@ -10,7 +11,20 @@ export const useGameStore = defineStore('game', {
     fur: 0,
     bacon: 0,
     leather: 0,
-    fireLit: false,
+    // 火堆状态：0-熄灭，1-闷烧，2-闪烁，3-燃烧，4-咆哮
+    fireLevel: 0,
+    // 火堆定时器，用于追踪上次添柴的时间
+    fireTimer: 0,
+    // 火堆状态名称
+    fireLevelNames: ['熄灭', '火光微弱', '轻轻闪烁', '燃烧着', '熊熊燃烧'],
+    // 火堆状态对应的音效
+    fireLevelSounds: [
+      'MUSIC_FIRE_DEAD',       // 熄灭
+      'MUSIC_FIRE_SMOLDERING',  // 闷烧
+      'MUSIC_FIRE_FLICKERING',  // 闪烁
+      'MUSIC_FIRE_BURNING',     // 燃烧
+      'MUSIC_FIRE_ROARING'      // 咆哮
+    ],
     darkMode: true,
     villageLevel: 0,
     villageUnlocked: false,
@@ -215,25 +229,44 @@ export const useGameStore = defineStore('game', {
         this.saveGameState()
       }
     },
-    lightFire() {
-      if (!this.fireLit) {
-        if (this.wood >= 1) {
-          this.wood -= 1
-          this.fireLit = true
-          this.addLog('你点燃了火堆', 1)
-          this.saveGameState()
-        } else {
-          this.addLog('木材不足，无法点燃火堆', 2)
-        }
-      } else {
-        if (this.wood >= 1) {
-          this.wood -= 1
-          this.addLog('你添柴加火，火堆熊熊燃烧')
-          this.saveGameState()
-        } else {
-          this.addLog('木材不足，无法添柴加火', 2)
-        }
+    checkFireLevel(typeName) {
+      // 检查火堆是否熄灭
+      if (this.fireLevel === 0) {
+        this.addLog('小屋火堆已经熄灭了，你无法进行' + typeName + '。赶紧重新点燃火堆吧！', 2)
+        return false
       }
+      return true
+    },
+    lightFire() {
+      // 检查木材是否足够
+      if (this.wood < 1) {
+        this.addLog(this.fireLevel === 0 ? '木材不够，没法生火取暖' : '木材不够，没法让火烧得更旺', 2)
+        return
+      }
+      
+      // 消耗木材
+      this.wood -= 1
+      // 重置火堆定时器
+      this.fireTimer = 0
+      
+      // 处理火堆状态变化
+      if (this.fireLevel === 0) {
+        // 点燃火堆
+        this.fireLevel = 1 // 点燃后直接到闷烧状态
+        this.addLog('微弱的火焰开始跳动，散发着温暖', 1)
+      } else if (this.fireLevel < 4) {
+        // 升级火堆状态
+        this.fireLevel += 1
+        this.addLog(`火焰${this.fireLevelNames[this.fireLevel]}`)
+      } else {
+        // 火堆已达到最高状态
+        this.addLog('火堆熊熊燃烧，房间很热')
+      }
+      
+      // 播放对应状态的音效
+      // audioPlayer.play(this.fireLevelSounds[this.fireLevel], true)
+      // 保存游戏状态
+      this.saveGameState()
     },
     unlockVillage() {
       const unlockWoodCost = defaultSettings.village.unlockWoodCost
@@ -255,6 +288,9 @@ export const useGameStore = defineStore('game', {
       this.saveGameState()
     },
     buildStructure() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('搭建建筑')) return
+      
       // 检查村落等级是否已达到上限
       if (this.villageLevel >= 50) {
         this.addLog('村落已达到最高等级50级，无法再升级', 2)
@@ -288,6 +324,9 @@ export const useGameStore = defineStore('game', {
     
     // 部署陷阱
     deployTrap() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('搭建陷阱')) return
+      
       const maxTraps = defaultSettings.building.trap.maxTraps
       if (this.traps >= maxTraps) {
         this.addLog(`陷阱已达到最大数量${maxTraps}个，无法再部署`, 2)
@@ -319,6 +358,9 @@ export const useGameStore = defineStore('game', {
     
     // 解锁货车
     unlockCart() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('解锁操作')) return
+      
       const woodCost = defaultSettings.building.cart.woodCost
       if (!this.cartUnlocked && this.wood >= woodCost) {
         this.wood -= woodCost
@@ -334,6 +376,9 @@ export const useGameStore = defineStore('game', {
     
     // 解锁狩猎小屋
     unlockHuntingCabin() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('解锁操作')) return
+      
       const woodCost = defaultSettings.hunting.cabin.woodCost
       const stoneCost = defaultSettings.hunting.cabin.stoneCost
       if (!this.huntingCabinUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
@@ -351,6 +396,9 @@ export const useGameStore = defineStore('game', {
     
     // 解锁制革小屋
     unlockTanneryCabin() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('解锁操作')) return
+      
       const woodCost = defaultSettings.tannery.cabin.woodCost
       const stoneCost = defaultSettings.tannery.cabin.stoneCost
       if (!this.tanneryCabinUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
@@ -368,6 +416,9 @@ export const useGameStore = defineStore('game', {
     
     // 解锁工坊
     unlockWorkshop() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('解锁操作')) return
+      
       const woodCost = defaultSettings.workshop.cabin.woodCost
       const stoneCost = defaultSettings.workshop.cabin.stoneCost
       if (!this.workshopUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
@@ -385,6 +436,9 @@ export const useGameStore = defineStore('game', {
     
     // 解锁石斧
     unlockStoneAxe() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('解锁操作')) return
+      
       const woodCost = defaultSettings.crafting.tools.find(tool => tool.id === 'stoneAxe').woodCost
       const stoneCost = defaultSettings.crafting.tools.find(tool => tool.id === 'stoneAxe').stoneCost
       if (!this.stoneAxeUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
@@ -594,6 +648,9 @@ export const useGameStore = defineStore('game', {
     },
     // 查看陷阱按钮
     checkTraps() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('收集操作')) return
+      
       if (this.cooldowns.trap > 0) return
       
       if (this.traps <= 0) {
@@ -699,6 +756,28 @@ export const useGameStore = defineStore('game', {
           this.cooldowns.trap -= 0.1
           if (this.cooldowns.trap < 0) {
             this.cooldowns.trap = 0
+          }
+        }
+        
+        // 火堆状态降级逻辑：每二十分钟不添柴火堆就会降一等级直至熄灭
+        if (this.fireLevel > 0) {
+          this.fireTimer += 0.1 // 每次增加0.1秒
+          // 20分钟 = 1200秒
+          if (this.fireTimer >= 60 * 20) {
+            this.fireTimer = 0 // 重置定时器
+            if (this.fireLevel > 1) {
+              this.fireLevel -= 1
+              this.addLog(`火堆许久没有添柴，火焰渐渐微弱`)
+              // 播放新状态的音效
+              // audioPlayer.play(this.fireLevelSounds[this.fireLevel], true)
+            } else {
+              // 火堆熄灭
+              this.fireLevel = 0
+              this.addLog('火堆最终熄灭了，只剩下一堆灰烬，小屋变得寒冷起来', 2)
+              // 停止所有音效
+              // audioPlayer.stop()
+            }
+            this.saveGameState()
           }
         }
         
@@ -923,7 +1002,8 @@ export const useGameStore = defineStore('game', {
           fur: this.fur,
           bacon: this.bacon,
           leather: this.leather,
-          fireLit: this.fireLit,
+          fireLevel: this.fireLevel,
+          fireTimer: this.fireTimer,
           darkMode: this.darkMode,
           villageLevel: this.villageLevel,
           villageUnlocked: this.villageUnlocked,
@@ -956,7 +1036,8 @@ export const useGameStore = defineStore('game', {
           this.fur = loadedState.fur || 0
           this.bacon = loadedState.bacon || 0
           this.leather = loadedState.leather || 0
-          this.fireLit = loadedState.fireLit || false
+          this.fireLevel = loadedState.fireLevel || 0
+          this.fireTimer = loadedState.fireTimer || 0
           this.darkMode = loadedState.darkMode || false
           this.villageLevel = loadedState.villageLevel || 0
           this.villageUnlocked = loadedState.villageUnlocked || false
@@ -1007,7 +1088,8 @@ export const useGameStore = defineStore('game', {
           fur: this.fur,
           bacon: this.bacon,
           leather: this.leather,
-          fireLit: this.fireLit,
+          fireLevel: this.fireLevel,
+          fireTimer: this.fireTimer,
           darkMode: this.darkMode,
           villageLevel: this.villageLevel,
           villageUnlocked: this.villageUnlocked,
@@ -1040,7 +1122,8 @@ export const useGameStore = defineStore('game', {
           this.fur = loadedState.fur || 0
           this.bacon = loadedState.bacon || 0
           this.leather = loadedState.leather || 0
-          this.fireLit = loadedState.fireLit || false
+          this.fireLevel = loadedState.fireLevel || 0
+          this.fireTimer = loadedState.fireTimer || 0
           this.darkMode = loadedState.darkMode || false
           this.villageLevel = loadedState.villageLevel || 0
           this.villageUnlocked = loadedState.villageUnlocked || false

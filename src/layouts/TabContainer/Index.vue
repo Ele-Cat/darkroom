@@ -6,10 +6,9 @@
       :data-tab="'cabin'"
       @click="switchTab('cabin')"
     >
-      {{ gameStore.fireLit ? '林中小屋' : '废弃小屋' }}
+      {{ gameStore.fireLevel > 0 ? '林中小屋' : '废弃小屋' }}
     </div>
     <div 
-      v-if="gameStore.fireLit"
       class="tab" 
       :class="{ active: activeTab === 'village', locked: !gameStore.villageUnlocked, unlockable: !gameStore.villageUnlocked && gameStore.wood >= unlockWoodCost && gameStore.stone >= unlockStoneCost }"
       :data-tab="'village'"
