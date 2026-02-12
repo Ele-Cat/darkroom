@@ -178,7 +178,7 @@ const getJobEffects = (job) => {
   padding: 8px;
   width: 100%;
   max-width: 240px;
-  box-shadow: 0 2px 4px @shadow-color;
+  box-shadow: 0 8px 10px @shadow-color;
 
   .job-module-title {
     text-align: center;
@@ -245,28 +245,7 @@ const getJobEffects = (job) => {
         z-index: 1;
       }
 
-      .upBtn,
-      .dnBtn {
-        right: 0px;
-      }
-
-      .upManyBtn,
-      .dnManyBtn {
-        right: 0px;
-      }
-
-      .upBtn.disabled,
-      .dnBtn.disabled,
-      .upManyBtn.disabled,
-      .dnManyBtn.disabled {
-        cursor: default;
-      }
-
-      .upBtn {
-        top: -2px;
-      }
-
-      .upManyBtn {
+      .upBtn, .upManyBtn {
         top: -2px;
       }
 
@@ -282,15 +261,6 @@ const getJobEffects = (job) => {
         bottom: -1px;
       }
 
-      .upBtn:after,
-      .upManyBtn:after {
-        border-color: transparent transparent rgba(0, 0, 0, 1);
-      }
-
-      .upManyBtn:after {
-        bottom: -2px;
-      }
-
       .upBtn:before,
       .upManyBtn:before {
         border-color: transparent transparent @primary-color;
@@ -301,16 +271,16 @@ const getJobEffects = (job) => {
         border-color: transparent transparent @primary-hover-color;
       }
 
-      .upBtn.disabled:before,
-      .upManyBtn.disabled:before {
-        border-color: transparent transparent @disabled-color;
+      .upBtn:after,
+      .upManyBtn:after {
+        border-color: transparent transparent rgba(0, 0, 0, 1);
       }
 
-      .dnBtn {
+      .upManyBtn:after {
         bottom: -2px;
       }
 
-      .dnManyBtn {
+      .dnBtn, .dnManyBtn {
         bottom: -2px;
       }
 
@@ -325,29 +295,14 @@ const getJobEffects = (job) => {
         width: 0;
         top: -1px;
       }
-
-      .upBtn:before,
       .dnBtn:before,
-      .upManyBtn:before,
       .dnManyBtn:before {
-        border-width: 4px;
-        left: 50%;
-        margin-left: -4px;
+        border-color: @primary-color transparent transparent;
       }
 
-      .upBtn:after,
-      .dnBtn:after {
-        border-width: 2px;
-        left: 50%;
-        margin-left: -2px;
-      }
-
-      /* See comment on .upBtn:after, .dnBtn:after */
-      .upManyBtn:after,
-      .dnManyBtn:after {
-        border-width: 2px;
-        left: 50%;
-        margin-left: -2px;
+      .dnBtn:hover:before,
+      .dnManyBtn:hover:before {
+        border-color: @primary-hover-color transparent transparent;
       }
 
       .dnBtn:after,
@@ -359,19 +314,22 @@ const getJobEffects = (job) => {
         top: -2px;
       }
 
+      .upBtn:before,
       .dnBtn:before,
+      .upManyBtn:before,
       .dnManyBtn:before {
-        border-color: @primary-color transparent transparent;
+        border-width: 4px;
+        left: 50%;
+        margin-left: -4px;
       }
 
-      .dnBtn:hover:before,
-      .dnManyBtn:hover:before {
-        border-color: @primary-hover-color transparent transparent;
-      }
-
-      .dnBtn.disabled:before,
-      .dnManyBtn.disabled:before {
-        border-color: @disabled-color transparent transparent;
+      .upBtn:after,
+      .dnBtn:after,
+      .upManyBtn:after,
+      .dnManyBtn:after {
+        border-width: 2px;
+        left: 50%;
+        margin-left: -2px;
       }
     }
   }
@@ -444,7 +402,7 @@ body.light-mode {
   .job-module {
     background-color: @light-bg-color;
     border: 1px solid @light-border-color;
-    box-shadow: 0 2px 4px @light-shadow-color;
+    box-shadow: 0 8px 10px @light-shadow-color;
 
     .job-module-title {
       color: @light-text-color;
@@ -468,11 +426,6 @@ body.light-mode {
           color: @light-text-color;
         }
 
-        .upBtn:after,
-        .upManyBtn:after {
-          border-color: transparent transparent rgba(0, 0, 0, 0.1);
-        }
-
         .upBtn:before,
         .upManyBtn:before {
           border-color: transparent transparent @light-primary-color;
@@ -483,9 +436,9 @@ body.light-mode {
           border-color: transparent transparent @light-primary-hover-color;
         }
 
-        .dnBtn:after,
-        .dnManyBtn:after {
-          border-color: rgba(0, 0, 0, 0.1) transparent transparent;
+        .upBtn:after,
+        .upManyBtn:after {
+          border-color: transparent transparent rgba(255, 255, 255, 1);
         }
 
         .dnBtn:before,
@@ -496,6 +449,11 @@ body.light-mode {
         .dnBtn:hover:before,
         .dnManyBtn:hover:before {
           border-color: @light-primary-hover-color transparent transparent;
+        }
+
+        .dnBtn:after,
+        .dnManyBtn:after {
+          border-color: rgba(255, 255, 255, 1) transparent transparent;
         }
 
         // 亮色模式下的tooltip样式

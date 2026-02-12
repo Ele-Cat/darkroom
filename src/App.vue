@@ -73,7 +73,7 @@ onMounted(() => {
   gameLoopInterval = setTimeout(gameLoop, 10)
   
   // 初始化任务进场话术
-  !gameStore.fireLit && gameStore.initGameLog()
+  gameStore.fireLevel === 0 && gameStore.initGameLog()
   
   // 监听新村民到来事件，切换到村落tab
   eventBus.on('newVillagersArrived', () => {
@@ -108,7 +108,7 @@ watch(activeTab, (newTab) => {
 
 // 监听影响标题的状态变化
 watch(
-  [() => gameStore.fireLit, () => gameStore.villageLevel],
+  [() => gameStore.fireLevel, () => gameStore.villageLevel],
   () => {
     updateBrowserTitle(activeTab.value)
   }

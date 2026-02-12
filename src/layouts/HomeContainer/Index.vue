@@ -2,15 +2,6 @@
   <ExploreModule v-if="activeTab === 'explore'" />
   
   <div class="tab-content" v-else>
-    <div 
-      v-if="activeTab === 'cabin' " 
-      class="fire-status" 
-      id="fireStatus"
-    >
-      <span v-if="gameStore.fireLit" class="fire-lit">火堆: 已点燃</span>
-      <span v-else>火堆: 未点燃</span>
-    </div>
-    
     <div class="cabin-layout">
       <div class="actions">
         <!-- 小屋：展示收集木材、收集石头 -->
@@ -48,17 +39,6 @@ const activeTab = inject('activeTab')
 <style scoped lang="less">
 @import '@/styles/variable.less';
 
-.fire-status {
-  text-align: center;
-  font-size: 14px;
-  margin: 5px 0;
-  padding: 5px;
-  background-color: rgba(255, 165, 0, 0.2);
-  border-radius: 3px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 /* 小屋布局 */
 .cabin-layout {
   display: flex;
@@ -72,23 +52,6 @@ const activeTab = inject('activeTab')
     display: flex;
     flex-direction: column;
     gap: 8px;
-  }
-}
-
-.fire-lit {
-  color: #ff9900;
-  animation: flicker 2s infinite alternate;
-}
-
-@keyframes flicker {
-  0% { opacity: 0.7; }
-  100% { opacity: 1; }
-}
-
-/* 亮色模式样式 */
-body.light-mode {
-  .fire-status {
-    background-color: rgba(255, 165, 0, 0.1);
   }
 }
 </style>

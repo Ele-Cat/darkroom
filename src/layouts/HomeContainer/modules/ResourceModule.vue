@@ -134,9 +134,15 @@ const maxPopulation = computed(() => {
   gap: 10px;
 }
 
-.village-info-group,
-.inventory-group {
+.resource-group {
+  display: flex;
+  flex-direction: column;
   align-self: flex-end;
+  gap: 5px;
+  background-color: @bg-color;
+  border: 1px solid @border-color;
+  padding: 8px;
+  border-radius: 3px;
   width: 100%;
   max-width: 200px;
 }
@@ -153,43 +159,12 @@ const maxPopulation = computed(() => {
   justify-content: space-between;
 }
 
-.buff-info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  font-weight: 400;
-  color: rgba(212, 175, 55, 0.8);
-}
-
-.buff-type {
-  margin-right: 10px;
-}
-
-.buff-change {
-  font-style: italic;
-}
-
-.inventory-group {
-  width: 100%;
-  max-width: 200px;
-}
-
 .inventory-title {
   text-align: center;
   font-weight: bold;
   margin-bottom: 8px;
   padding-bottom: 5px;
   border-bottom: 1px solid @border-color;
-}
-
-.resource-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  background-color: @bg-color;
-  border: 1px solid @border-color;
-  padding: 8px;
-  border-radius: 3px;
 }
 
 /* 亮色模式样式 */
@@ -200,12 +175,13 @@ body.light-mode {
   }
   
   .resource-group {
-    background-color: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(153, 153, 153, 0.2);
+    background-color: @light-bg-color;
+    border: 1px solid @light-border-color;
   }
   
   .inventory-title {
-    border-bottom: 1px solid rgba(153, 153, 153, 0.3);
+    color: @light-text-color;
+    border-bottom: 1px solid @light-border-hover-color;
   }
 }
 </style>

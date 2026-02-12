@@ -53,7 +53,7 @@ class TitleManager {
     
     switch (tab) {
       case 'cabin':
-        newTitle = `${gameStore.fireLit ? '林中小屋' : '废弃小屋'} - ${this.baseTitle}`
+        newTitle = `${gameStore.fireLevel > 0 ? '林中小屋' : '废弃小屋'} - ${this.baseTitle}`
         break
       case 'village':
         newTitle = `${gameStore.getVillageName()} - ${this.baseTitle}`

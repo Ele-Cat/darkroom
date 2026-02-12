@@ -3,6 +3,7 @@
     <BasicButton
       :buttonId="buttonId"
       :disabled="disabled"
+      :className="buttonClass"
       @button-click="handleClick"
       @mouseenter="!disabled && (showTooltip = true)"
       @mouseleave="showTooltip = false"
@@ -31,6 +32,10 @@ const props = defineProps({
   buttonText: {
     type: String,
     required: true
+  },
+  buttonClass: {
+    type: String,
+    default: ''
   },
   tooltipText: {
     type: String,
