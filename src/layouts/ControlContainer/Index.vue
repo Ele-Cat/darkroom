@@ -53,7 +53,7 @@
 
 <script setup>
 import { inject, ref, watch } from "vue";
-import ImportExportModal from "@/components/ImportExportModal.vue";
+import ImportExportModal from "./modules/ImportExportModal.vue";
 import AudioModule from "./modules/AudioModule.vue";
 import ControlButton from "@/components/ControlButton.vue";
 
