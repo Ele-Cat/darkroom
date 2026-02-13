@@ -10,15 +10,11 @@
         :disabled="gameStore.cartUnlocked"
         @button-click="unlockCart"
       />
-      
-      <!-- 石斧按钮 -->
+
       <TooltipButton 
         v-if="gameStore.workshopUnlocked"
-        button-id="unlockStoneAxe"
-        button-text="石斧"
-        :tooltip-text="getStoneAxeTooltip()"
-        :disabled="gameStore.stoneAxeUnlocked"
-        @button-click="unlockStoneAxe"
+        button-text="假装可以制造东西"
+        tooltip-text="骗你的 点击没用"
       />
     </div>
   </div>
@@ -32,16 +28,8 @@ import defaultSettings from '@/config/defaultSettings'
 // 接收gameStore实例
 const gameStore = inject('gameStore')
 
-const unlockStoneAxe = () => {
-  gameStore.unlockStoneAxe()
-}
-
 const unlockCart = () => {
   gameStore.unlockCart()
-}
-
-const getStoneAxeTooltip = () => {
-  return `木材 ${defaultSettings.crafting.tools.find(tool => tool.id === 'stoneAxe').woodCost}, 石头 ${defaultSettings.crafting.tools.find(tool => tool.id === 'stoneAxe').stoneCost}`
 }
 
 const getCartTooltip = () => {

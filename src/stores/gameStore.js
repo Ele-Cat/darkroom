@@ -5,12 +5,11 @@ import audioPlayer from '@/utils/audioPlayer'
 
 export const useGameStore = defineStore('game', {
   state: () => ({
-    wood: 0,
-    stone: 0,
-    meat: 0,
-    fur: 0,
-    bacon: 0,
-    leather: 0,
+    wood: 0, // 木材数量
+    meat: 0, // 生肉数量
+    fur: 0, // 毛皮数量
+    bacon: 0, // 熏肉数量
+    leather: 0, // 皮革数量
     // 火堆状态：0-熄灭，1-闷烧，2-闪烁，3-燃烧，4-咆哮
     fireLevel: 0,
     // 火堆定时器，用于追踪上次添柴的时间
@@ -25,40 +24,39 @@ export const useGameStore = defineStore('game', {
       'MUSIC_FIRE_BURNING',     // 燃烧
       'MUSIC_FIRE_ROARING'      // 咆哮
     ],
-    darkMode: true,
-    villageLevel: 0,
-    villageUnlocked: false,
-    villageTabVisible: false,
-    population: 0,
-    populationTimer: null,
-    cartUnlocked: false,
-    huntingCabinUnlocked: false,
-    tanneryCabinUnlocked: false,
-    workshopUnlocked: false,
-    stoneAxeUnlocked: false,
-    jobModuleUnlocked: false,
-    traps: 0,
+    darkMode: true, // 是否为暗色模式
+    villageLevel: 0, // 村落等级
+    villageUnlocked: false, // 村落是否解锁
+    population: 0, // 人口数量
+    populationTimer: null, // 人口到达定时器
+    cartUnlocked: false, // 货车是否解锁
+    huntingCabinUnlocked: false, // 狩猎小屋是否解锁
+    smokehouseCabinUnlocked: false, // 熏肉小屋是否解锁
+    tanneryCabinUnlocked: false, // 制革小屋是否解锁
+    tradingPostUnlocked: false, // 贸易站是否解锁
+    workshopUnlocked: false, // 工坊是否解锁
+    jobModuleUnlocked: false, // 工作模块是否解锁
+    traps: 0, // 陷阱数量
     jobs: {
-      lumberjack: 0,
-      miner: 0,
-      hunter: 0,
-      butcher: 0,
-      tanner: 0
+      lumberjack: 0, // 伐木工人数
+      hunter: 0, // 猎人人数
+      butcher: 0, // 熏肉师人数
+      smoker: 0, // 熏肉师人数
+      tanner: 0 // 皮革师人数
     },
     cooldowns: {
-      wood: 0,
-      stone: 0,
-      trap: 0
+      wood: 0, // 木材冷却时间
+      trap: 0 // 陷阱冷却时间
     },
     // 资源增加计数器（每100次触发一次，即10秒）
     resourceTimerCounter: 0,
     // 天灾系统
     disasterSystem: {
-      timer: 0,
-      nextDisasterTime: Math.floor(Math.random() * (defaultSettings.disaster.cd.max - defaultSettings.disaster.cd.min + 1)) + defaultSettings.disaster.cd.min, // 5-15分钟
+      timer: 0, // 天灾计时器
+      nextDisasterTime: Math.floor(Math.random() * (defaultSettings.disaster.cd.max - defaultSettings.disaster.cd.min + 1)) + defaultSettings.disaster.cd.min, // 下次天灾时间（分钟）
       disasterActive: false // 标记是否有天灾正在显示
     },
-    logs: [],
+    logs: [], // 日志列表
     // 日志队列，用于延迟显示
     logQueue: [],
     // 日志队列处理定时器
@@ -68,13 +66,10 @@ export const useGameStore = defineStore('game', {
   }),
   getters: {
     canUnlockVillage: (state) => {
-      return state.wood >= defaultSettings.village.unlockWoodCost && state.stone >= defaultSettings.village.unlockStoneCost
+      return state.wood >= defaultSettings.village.unlockWoodCost
     },
     canShowExploreTab: (state) => {
       return state.villageLevel >= 10 && false
-    },
-    canShowVillageTab: (state) => {
-      return state.villageTabVisible
     },
     maxPopulation: (state) => {
       return state.villageLevel * defaultSettings.building.cabin.maxPopulationPerCabin
@@ -83,7 +78,6 @@ export const useGameStore = defineStore('game', {
     materialBuffs: (state) => {
       const buffs = {
         wood: 0,
-        stone: 0,
         meat: 0,
         fur: 0,
         bacon: 0,
@@ -93,7 +87,6 @@ export const useGameStore = defineStore('game', {
       // 货车buff
       if (state.cartUnlocked) {
         buffs.wood += defaultSettings.buffs.cart.wood
-        buffs.stone += defaultSettings.buffs.cart.stone
       }
       
       // 工作模块buff
@@ -103,21 +96,7 @@ export const useGameStore = defineStore('game', {
           const lumberjackBuff = defaultSettings.jobs.types.find(job => job.id === 'lumberjack')
           if (lumberjackBuff) {
             let efficiencyMultiplier = 1
-            if (state.stoneAxeUnlocked) {
-              efficiencyMultiplier = 2
-            }
             buffs.wood += state.jobs.lumberjack * lumberjackBuff.wood * efficiencyMultiplier
-          }
-        }
-        // 采石工buff
-        if (state.jobs.miner > 0) {
-          const minerBuff = defaultSettings.jobs.types.find(job => job.id === 'miner')
-          if (minerBuff) {
-            let efficiencyMultiplier = 1
-            if (state.stoneAxeUnlocked) {
-              efficiencyMultiplier = 2
-            }
-            buffs.stone += state.jobs.miner * minerBuff.stone * efficiencyMultiplier
           }
         }
         // 猎人buff
@@ -154,7 +133,6 @@ export const useGameStore = defineStore('game', {
       const buffs = getters.materialBuffs
       return {
         wood: buffs.wood,
-        stone: buffs.stone,
         meat: buffs.meat,
         fur: buffs.fur,
         bacon: buffs.bacon,
@@ -170,21 +148,17 @@ export const useGameStore = defineStore('game', {
     totalJobs: (state) => {
       return Object.values(state.jobs).reduce((sum, count) => sum + count, 0)
     },
-    // 工作模块是否解锁
-    isJobModuleUnlocked: (state) => {
-      return state.jobModuleUnlocked
-    }
   },
   actions: {
     getVillageName() {
       const level = this.villageLevel
-      if (level >= 41) {
+      if (level >= 26) {
         return '喧嚣城镇'
-      } else if (level >= 31) {
+      } else if (level >= 20) {
         return '小型城镇'
-      } else if (level >= 21) {
+      } else if (level >= 14) {
         return '大型村落'
-      } else if (level >= 11) {
+      } else if (level >= 8) {
         return '中型村落'
       } else if (level >= 2) {
         return '小型村落'
@@ -192,40 +166,15 @@ export const useGameStore = defineStore('game', {
         return '村落'
       }
     },
-    showVillageTab() {
-      if (!this.villageTabVisible) {
-        this.villageTabVisible = true
-        this.addLog('村落区域已发现', 1)
-        this.saveGameState()
-      }
-    },
     collectWood() {
       if (this.cooldowns.wood <= 0) {
         let woodAmount = defaultSettings.collection.wood.amount
         if (this.cartUnlocked) {
-          woodAmount += 5
-        }
-        if (this.stoneAxeUnlocked) {
-          woodAmount += defaultSettings.crafting.tools.find(tool => tool.id === 'stoneAxe').woodEfficiency
+          woodAmount += 10
         }
         this.wood += woodAmount
         this.addLog(`你收集了${woodAmount}块木材`)
         this.cooldowns.wood = defaultSettings.collection.wood.cooldown
-        this.saveGameState()
-      }
-    },
-    collectStone() {
-      if (this.cooldowns.stone <= 0) {
-        let stoneAmount = defaultSettings.collection.stone.amount
-        if (this.cartUnlocked) {
-          stoneAmount += 5
-        }
-        if (this.stoneAxeUnlocked) {
-          stoneAmount += defaultSettings.crafting.tools.find(tool => tool.id === 'stoneAxe').stoneEfficiency
-        }
-        this.stone += stoneAmount
-        this.addLog(`你收集了${stoneAmount}块石头`)
-        this.cooldowns.stone = defaultSettings.collection.stone.cooldown
         this.saveGameState()
       }
     },
@@ -270,47 +219,34 @@ export const useGameStore = defineStore('game', {
     },
     unlockVillage() {
       const unlockWoodCost = defaultSettings.village.unlockWoodCost
-      const unlockStoneCost = defaultSettings.village.unlockStoneCost
-      if (this.wood >= unlockWoodCost && this.stone >= unlockStoneCost) {
+      if (this.wood >= unlockWoodCost) {
         this.wood -= unlockWoodCost
-        this.stone -= unlockStoneCost
         this.villageUnlocked = true
         this.addLog(`你解锁了村落，现在可以返回小屋管理它`, 1)
         this.saveGameState()
       } else {
-        this.addLog(`资源不足，需要${unlockWoodCost}木材和${unlockStoneCost}石头才能解锁村落`, 2)
+        this.addLog(`资源不足，需要${unlockWoodCost}木材才能解锁村落`, 2)
       }
-    },
-    exploreVillage() {
-      this.addLog('你探索了村落，发现了一些有用的资源')
-      this.wood += Math.floor(Math.random() * 3) + 1
-      this.stone += Math.floor(Math.random() * 2) + 1
-      this.saveGameState()
     },
     buildStructure() {
       // 检查火堆是否熄灭
       if (!this.checkFireLevel('搭建建筑')) return
       
       // 检查村落等级是否已达到上限
-      if (this.villageLevel >= 50) {
-        this.addLog('村落已达到最高等级50级，无法再升级', 2)
+      if (this.villageLevel >= 30) {
+        this.addLog('村落已达到最大容量', 2)
         return
       }
       
       // 使用配置项计算资源消耗
       const baseWoodCost = defaultSettings.building.cabin.baseWoodCost
-      const baseStoneCost = defaultSettings.building.cabin.baseStoneCost
       const woodCostIncreasePerLevel = defaultSettings.building.cabin.woodCostIncreasePerLevel
-      const stoneCostIncreasePerLevel = defaultSettings.building.cabin.stoneCostIncreasePerLevel
       const woodCost = baseWoodCost + Math.floor(this.villageLevel * woodCostIncreasePerLevel)
-      const stoneCost = baseStoneCost + Math.floor(this.villageLevel * stoneCostIncreasePerLevel)
       
-      // 校验资源是否足够
-      if (this.wood >= woodCost && this.stone >= stoneCost) {
+      if (this.wood >= woodCost) {
         this.wood -= woodCost
-        this.stone -= stoneCost
         this.villageLevel += 1
-        this.addLog(`你建造了小屋建筑，村落升级到${this.villageLevel}级`, 1)
+        this.addLog('你建造了居住小屋', 1)
         if (this.villageLevel === 1) {
           this.addLog(`消息不胫而走，将会有居民入住你的村落`, 1)
         }
@@ -335,16 +271,12 @@ export const useGameStore = defineStore('game', {
       
       // 计算部署陷阱的成本
       const initialWoodCost = defaultSettings.building.trap.initialWoodCost
-      const initialStoneCost = defaultSettings.building.trap.initialStoneCost
       const woodCostIncrease = defaultSettings.building.trap.woodCostIncrease
-      const stoneCostIncrease = defaultSettings.building.trap.stoneCostIncrease
       
       const woodCost = initialWoodCost + this.traps * woodCostIncrease
-      const stoneCost = initialStoneCost + this.traps * stoneCostIncrease
       
-      if (this.wood >= woodCost && this.stone >= stoneCost) {
+      if (this.wood >= woodCost) {
         this.wood -= woodCost
-        this.stone -= stoneCost
         this.traps += 1
         this.addLog(`陷阱越多，抓到的猎物就越多，现共有${this.traps}个陷阱`)
         if (this.traps === maxTraps) {
@@ -352,7 +284,7 @@ export const useGameStore = defineStore('game', {
         }
         this.saveGameState()
       } else {
-        this.addLog(`资源不足，需要${woodCost}木材和${stoneCost}石头才能部署陷阱`, 2)
+        this.addLog(`资源不足，需要${woodCost}木材才能部署陷阱`, 2)
       }
     },
     
@@ -365,7 +297,7 @@ export const useGameStore = defineStore('game', {
       if (!this.cartUnlocked && this.wood >= woodCost) {
         this.wood -= woodCost
         this.cartUnlocked = true
-        this.addLog('解锁货车，手动收集翻倍，每十秒自动增加木材和石头', 1)
+        this.addLog('货车已解锁，收集效率更高', 1)
         this.saveGameState()
       } else if (this.cartUnlocked) {
         this.addLog('货车已经解锁', 1)
@@ -380,17 +312,39 @@ export const useGameStore = defineStore('game', {
       if (!this.checkFireLevel('解锁操作')) return
       
       const woodCost = defaultSettings.hunting.cabin.woodCost
-      const stoneCost = defaultSettings.hunting.cabin.stoneCost
-      if (!this.huntingCabinUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
+      const furCost = defaultSettings.hunting.cabin.furCost
+      const meatCost = defaultSettings.hunting.cabin.meatCost
+      if (!this.huntingCabinUnlocked && this.wood >= woodCost && this.fur >= furCost && this.meat >= meatCost) {
         this.wood -= woodCost
-        this.stone -= stoneCost
+        this.fur -= furCost
+        this.meat -= meatCost
         this.huntingCabinUnlocked = true
-        this.addLog('你解锁了狩猎小屋，新增了猎人和熏肉师工作', 1)
+        this.addLog('你解锁了狩猎小屋，新增了猎人工作', 1)
         this.saveGameState()
       } else if (this.huntingCabinUnlocked) {
         this.addLog('狩猎小屋已经解锁', 1)
       } else {
         this.addLog('资源不足，无法解锁狩猎小屋', 2)
+      }
+    },
+    
+    // 解锁熏肉小屋
+    unlockSmokehouseCabin() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('解锁操作')) return
+      
+      const woodCost = defaultSettings.smokehouse.cabin.woodCost
+      const meatCost = defaultSettings.smokehouse.cabin.meatCost
+      if (!this.smokehouseCabinUnlocked && this.wood >= woodCost && this.meat >= meatCost) {
+        this.wood -= woodCost
+        this.meat -= meatCost
+        this.smokehouseCabinUnlocked = true
+        this.addLog('你解锁了熏肉小屋，新增了熏肉师工作', 1)
+        this.saveGameState()
+      } else if (this.smokehouseCabinUnlocked) {
+        this.addLog('熏肉小屋已经解锁', 1)
+      } else {
+        this.addLog('资源不足，无法解锁熏肉小屋', 2)
       }
     },
     
@@ -400,10 +354,10 @@ export const useGameStore = defineStore('game', {
       if (!this.checkFireLevel('解锁操作')) return
       
       const woodCost = defaultSettings.tannery.cabin.woodCost
-      const stoneCost = defaultSettings.tannery.cabin.stoneCost
-      if (!this.tanneryCabinUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
+      const furCost = defaultSettings.tannery.cabin.furCost
+      if (!this.tanneryCabinUnlocked && this.wood >= woodCost && this.fur >= furCost) {
         this.wood -= woodCost
-        this.stone -= stoneCost
+        this.fur -= furCost
         this.tanneryCabinUnlocked = true
         this.addLog('你解锁了制革小屋，新增了皮革师工作', 1)
         this.saveGameState()
@@ -414,16 +368,40 @@ export const useGameStore = defineStore('game', {
       }
     },
     
+    // 解锁贸易站
+    unlockTradingPost() {
+      // 检查火堆是否熄灭
+      if (!this.checkFireLevel('解锁操作')) return
+      
+      const woodCost = defaultSettings.tradingPost.cabin.woodCost
+      const baconCost = defaultSettings.tradingPost.cabin.baconCost
+      const leatherCost = defaultSettings.tradingPost.cabin.leatherCost
+      if (!this.tradingPostUnlocked && this.wood >= woodCost && this.bacon >= baconCost && this.leather >= leatherCost) {
+        this.wood -= woodCost
+        this.bacon -= baconCost
+        this.leather -= leatherCost
+        this.tradingPostUnlocked = true
+        this.addLog('你解锁了贸易站，可以购买物品', 1)
+        this.saveGameState()
+      } else if (this.tradingPostUnlocked) {
+        this.addLog('贸易站已经解锁', 1)
+      } else {
+        this.addLog('资源不足，无法解锁贸易站', 2)
+      }
+    },
+    
     // 解锁工坊
     unlockWorkshop() {
       // 检查火堆是否熄灭
       if (!this.checkFireLevel('解锁操作')) return
       
       const woodCost = defaultSettings.workshop.cabin.woodCost
-      const stoneCost = defaultSettings.workshop.cabin.stoneCost
-      if (!this.workshopUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
+      const meatCost = defaultSettings.workshop.cabin.meatCost
+      const furCost = defaultSettings.workshop.cabin.furCost
+      if (!this.workshopUnlocked && this.wood >= woodCost && this.meat >= meatCost && this.fur >= furCost) {
         this.wood -= woodCost
-        this.stone -= stoneCost
+        this.meat -= meatCost
+        this.fur -= furCost
         this.workshopUnlocked = true
         this.addLog('你解锁了工坊建筑', 1)
         this.saveGameState()
@@ -434,34 +412,11 @@ export const useGameStore = defineStore('game', {
       }
     },
     
-    // 解锁石斧
-    unlockStoneAxe() {
-      // 检查火堆是否熄灭
-      if (!this.checkFireLevel('解锁操作')) return
-      
-      const woodCost = defaultSettings.crafting.tools.find(tool => tool.id === 'stoneAxe').woodCost
-      const stoneCost = defaultSettings.crafting.tools.find(tool => tool.id === 'stoneAxe').stoneCost
-      if (!this.stoneAxeUnlocked && this.wood >= woodCost && this.stone >= stoneCost) {
-        this.wood -= woodCost
-        this.stone -= stoneCost
-        this.stoneAxeUnlocked = true
-        this.addLog(`你花费了${woodCost}木材和${stoneCost}石头，成功解锁了石斧！`, 1)
-        this.addLog('石斧的锋利刃口大幅提高了采集效率，伐木工和采石工的工作效率现在翻了一倍！', 1)
-        this.saveGameState()
-      } else if (this.stoneAxeUnlocked) {
-        this.addLog('石斧已经解锁', 1)
-      } else {
-        this.addLog(`资源不足，无法解锁石斧。需要${woodCost}木材和${stoneCost}石头。`, 2)
-      }
-    },
-    
     // 货车自动增加资源
     increaseResourcesByCart() {
       if (this.cartUnlocked) {
         const woodIncrease = defaultSettings.buffs.cart.wood
-        const stoneIncrease = defaultSettings.buffs.cart.stone
         this.wood += woodIncrease
-        this.stone += stoneIncrease
         this.saveGameState()
       }
     },
@@ -475,24 +430,8 @@ export const useGameStore = defineStore('game', {
           if (lumberjackBuff) {
             // 计算效率乘数，考虑石斧的影响
             let efficiencyMultiplier = 1
-            if (this.stoneAxeUnlocked) {
-              efficiencyMultiplier = 2
-            }
             const woodIncrease = this.jobs.lumberjack * lumberjackBuff.wood * efficiencyMultiplier
             this.wood += woodIncrease
-          }
-        }
-        // 采石工增加石头
-        if (this.jobs.miner > 0) {
-          const minerBuff = defaultSettings.jobs.types.find(job => job.id === 'miner')
-          if (minerBuff) {
-            // 计算效率乘数，考虑石斧的影响
-            let efficiencyMultiplier = 1
-            if (this.stoneAxeUnlocked) {
-              efficiencyMultiplier = 2
-            }
-            const stoneIncrease = this.jobs.miner * minerBuff.stone * efficiencyMultiplier
-            this.stone += stoneIncrease
           }
         }
         // 猎人增加生肉和毛皮
@@ -506,7 +445,7 @@ export const useGameStore = defineStore('game', {
           }
         }
         // 熏肉师生产熏肉（消耗生肉和木材）
-        if (this.jobs.butcher > 0 && this.huntingCabinUnlocked) {
+        if (this.jobs.butcher > 0 && this.smokehouseCabinUnlocked) {
           const butcherBuff = defaultSettings.jobs.types.find(job => job.id === 'butcher')
           if (butcherBuff) {
             // 检查是否有足够的资源
@@ -541,43 +480,47 @@ export const useGameStore = defineStore('game', {
     
     // 调整工种人数
     adjustJobCount(jobId, change) {
-      // 确保jobs对象中存在对应的属性
-      if (!this.jobs.hasOwnProperty(jobId)) {
-        this.jobs[jobId] = 0
+      // 不允许直接调整伐木工人数
+      if (jobId === 'lumberjack') {
+        return
       }
-      const newCount = this.jobs[jobId] + change
-      const totalJobs = Object.values(this.jobs).reduce((sum, count) => sum + count, 0)
-      const newTotalJobs = totalJobs + change
       
-      // 确保人数不能为负数，且总人数不能超过人口总数
-      if (newCount >= 0 && newTotalJobs <= this.population) {
-        this.jobs[jobId] = newCount
-        this.saveGameState()
-      }
-    },
-    
-    // 快速调整工种人数
-    quickAdjustJobCount(jobId, change) {
       // 确保jobs对象中存在对应的属性
       if (!this.jobs.hasOwnProperty(jobId)) {
         this.jobs[jobId] = 0
       }
       
-      let newCount
+      // 计算调整后的目标工种人数
+      let newJobCount
       if (change > 0) {
-        // 增加人数：使用所有可用的闲散人员
-        const idlePopulation = this.population - Object.values(this.jobs).reduce((sum, count) => sum + count, 0)
-        newCount = this.jobs[jobId] + Math.min(change, idlePopulation)
+        // 增加人数：不能超过总人口
+        newJobCount = Math.min(this.jobs[jobId] + change, this.population)
       } else {
-        // 减少人数：减少到至少0
-        newCount = Math.max(0, this.jobs[jobId] + change)
+        // 减少人数：至少为0
+        newJobCount = Math.max(0, this.jobs[jobId] + change)
       }
       
-      // 确保人数不能为负数
-      if (newCount >= 0) {
-        this.jobs[jobId] = newCount
-        this.saveGameState()
+      // 计算人数变化量
+      const jobChange = newJobCount - this.jobs[jobId]
+      
+      // 确保人数变化量有效
+      if (jobChange === 0) {
+        return
       }
+      
+      // 更新目标工种人数
+      this.jobs[jobId] = newJobCount
+      
+      // 计算所有其他工种的总人数
+      const otherJobsTotal = Object.values(this.jobs).reduce((sum, count, index, array) => {
+        const jobIds = Object.keys(this.jobs)
+        return jobIds[index] === 'lumberjack' ? sum : sum + count
+      }, 0)
+      
+      // 自动调整伐木工人数，确保总工作人数等于总人口
+      this.jobs.lumberjack = Math.max(0, this.population - otherJobsTotal)
+      
+      this.saveGameState()
     },
     
     // 启动人口到达定时器
@@ -626,6 +569,8 @@ export const useGameStore = defineStore('game', {
       
       if (actualArrivalCount > 0) {
         this.population += actualArrivalCount
+        // 默认将新村民添加为伐木工
+        this.jobs.lumberjack = (this.jobs.lumberjack || 0) + actualArrivalCount
         const scene = this.getArrivalScene()
         this.addLog(`${scene}，有${actualArrivalCount}人来到了你的村落`, 1)
         
@@ -744,12 +689,6 @@ export const useGameStore = defineStore('game', {
           this.cooldowns.wood -= 0.1
           if (this.cooldowns.wood < 0) {
             this.cooldowns.wood = 0
-          }
-        }
-        if (this.cooldowns.stone > 0) {
-          this.cooldowns.stone -= 0.1
-          if (this.cooldowns.stone < 0) {
-            this.cooldowns.stone = 0
           }
         }
         if (this.cooldowns.trap > 0) {
@@ -978,7 +917,6 @@ export const useGameStore = defineStore('game', {
         this.darkMode = currentDarkMode
         this.cooldowns = {
           wood: 0,
-          stone: 0,
           trap: 0
         }
         // 重置日志队列相关状态
@@ -991,13 +929,14 @@ export const useGameStore = defineStore('game', {
         this.saveGameState()
         // 初始化任务进场话术
         this.initGameLog()
+        // 触发重置标签页事件
+        eventBus.emit('resetTab')
       }
     },
     saveGameState() {
       try {
         const gameState = {
           wood: this.wood,
-          stone: this.stone,
           meat: this.meat,
           fur: this.fur,
           bacon: this.bacon,
@@ -1010,9 +949,10 @@ export const useGameStore = defineStore('game', {
           population: this.population,
           cartUnlocked: this.cartUnlocked,
           huntingCabinUnlocked: this.huntingCabinUnlocked,
+          smokehouseCabinUnlocked: this.smokehouseCabinUnlocked,
           tanneryCabinUnlocked: this.tanneryCabinUnlocked,
+          tradingPostUnlocked: this.tradingPostUnlocked,
           workshopUnlocked: this.workshopUnlocked,
-          stoneAxeUnlocked: this.stoneAxeUnlocked,
           jobModuleUnlocked: this.jobModuleUnlocked,
           traps: this.traps,
           jobs: this.jobs
@@ -1031,7 +971,6 @@ export const useGameStore = defineStore('game', {
           const gameStateJson = decodeURIComponent(escape(atob(gameStateBase64)))
           const loadedState = JSON.parse(gameStateJson)
           this.wood = loadedState.wood || 0
-          this.stone = loadedState.stone || 0
           this.meat = loadedState.meat || 0
           this.fur = loadedState.fur || 0
           this.bacon = loadedState.bacon || 0
@@ -1044,21 +983,20 @@ export const useGameStore = defineStore('game', {
           this.population = loadedState.population || 0
           this.cartUnlocked = loadedState.cartUnlocked || false
           this.huntingCabinUnlocked = loadedState.huntingCabinUnlocked || false
+          this.smokehouseCabinUnlocked = loadedState.smokehouseCabinUnlocked || false
           this.tanneryCabinUnlocked = loadedState.tanneryCabinUnlocked || false
+          this.tradingPostUnlocked = loadedState.tradingPostUnlocked || false
           this.workshopUnlocked = loadedState.workshopUnlocked || false
-          this.stoneAxeUnlocked = loadedState.stoneAxeUnlocked || false
           this.jobModuleUnlocked = loadedState.jobModuleUnlocked || false
           this.traps = loadedState.traps || 0
           this.jobs = loadedState.jobs || {
             lumberjack: 0,
-            miner: 0,
             hunter: 0,
             butcher: 0,
             tanner: 0
           }
           this.cooldowns = {
             wood: 0,
-            stone: 0,
             trap: 0
           }
           // 重置日志队列相关状态
@@ -1083,7 +1021,6 @@ export const useGameStore = defineStore('game', {
       try {
         const gameState = {
           wood: this.wood,
-          stone: this.stone,
           meat: this.meat,
           fur: this.fur,
           bacon: this.bacon,
@@ -1096,7 +1033,9 @@ export const useGameStore = defineStore('game', {
           population: this.population,
           cartUnlocked: this.cartUnlocked,
           huntingCabinUnlocked: this.huntingCabinUnlocked,
+          smokehouseCabinUnlocked: this.smokehouseCabinUnlocked,
           tanneryCabinUnlocked: this.tanneryCabinUnlocked,
+          tradingPostUnlocked: this.tradingPostUnlocked,
           jobModuleUnlocked: this.jobModuleUnlocked,
           traps: this.traps,
           jobs: this.jobs
@@ -1117,7 +1056,6 @@ export const useGameStore = defineStore('game', {
           const gameStateJson = decodeURIComponent(escape(atob(gameStateBase64)))
           const loadedState = JSON.parse(gameStateJson)
           this.wood = loadedState.wood || 0
-          this.stone = loadedState.stone || 0
           this.meat = loadedState.meat || 0
           this.fur = loadedState.fur || 0
           this.bacon = loadedState.bacon || 0
@@ -1130,22 +1068,20 @@ export const useGameStore = defineStore('game', {
           this.population = loadedState.population || 0
           this.cartUnlocked = loadedState.cartUnlocked || false
           this.huntingCabinUnlocked = loadedState.huntingCabinUnlocked || false
+          this.smokehouseCabinUnlocked = loadedState.smokehouseCabinUnlocked || false
           this.tanneryCabinUnlocked = loadedState.tanneryCabinUnlocked || false
+          this.tradingPostUnlocked = loadedState.tradingPostUnlocked || false
           this.workshopUnlocked = loadedState.workshopUnlocked || false
-          this.stoneAxeUnlocked = loadedState.stoneAxeUnlocked || false
           this.jobModuleUnlocked = loadedState.jobModuleUnlocked || false
           this.traps = loadedState.traps || 0
           this.jobs = loadedState.jobs || {
             lumberjack: 0,
-            miner: 0,
             hunter: 0,
             butcher: 0,
             tanner: 0
           }
-          this.villageTabVisible = loadedState.villageTabVisible || false
           this.cooldowns = {
             wood: 0,
-            stone: 0,
             trap: 0
           }
           // 重置日志队列相关状态
@@ -1155,6 +1091,8 @@ export const useGameStore = defineStore('game', {
             this.logQueueTimer = null
           }
           this.saveGameState()
+          // 触发重置标签页事件
+          eventBus.emit('resetTab')
           this.addLog('游戏已导入', 1)
           // 如果村落有小屋且人口未满，启动人口到达定时器
           if (this.villageLevel > 0 && this.population < this.villageLevel * defaultSettings.building.cabin.maxPopulationPerCabin) {

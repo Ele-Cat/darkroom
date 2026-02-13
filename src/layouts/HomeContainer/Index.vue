@@ -4,13 +4,14 @@
   <div class="tab-content" v-else>
     <div class="cabin-layout">
       <div class="actions">
-        <!-- 小屋：展示收集木材、收集石头 -->
         <CollectionModule />
 
         <BuildModule v-if="activeTab === 'cabin' && gameStore.villageUnlocked" />
       </div>
 
       <CraftModule v-if="activeTab === 'cabin' && gameStore.villageUnlocked" />
+
+      <TradingModule v-if="activeTab === 'cabin' && gameStore.tradingPostUnlocked" />
       
       <!-- 工作模块 -->
       <JobModule />
@@ -27,6 +28,7 @@ import CollectionModule from './modules/CollectionModule.vue'
 import JobModule from './modules/JobModule.vue'
 import BuildModule from './modules/BuildModule.vue'
 import CraftModule from './modules/CraftModule.vue'
+import TradingModule from './modules/TradingModule.vue'
 import ResourceModule from './modules/ResourceModule.vue'
 import ExploreModule from './modules/ExploreModule.vue'
 

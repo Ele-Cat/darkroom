@@ -1,12 +1,6 @@
 <template>
-  <div class="job-module" v-if="gameStore.isJobModuleUnlocked && activeTab === 'village'">
+  <div class="job-module" v-if="gameStore.jobModuleUnlocked && activeTab === 'village'">
     <div class="job-module-title">工作</div>
-    <div class="job-info">
-      <div class="idle-population">
-        <span>闲散人员:</span>
-        <span>{{ idlePopulation }}</span>
-      </div>
-    </div>
     <div class="jobs-list">
       <div 
         class="job-item" 
@@ -17,26 +11,17 @@
       >
         <div class="job-name">{{ job.name }}</div>
         <div class="job-count">{{ jobCount(job.id) }}</div>
-        <div class="arrow-groups">
-          <!-- 第一组按钮：+1/-1 -->
+        <div class="arrow-groups" v-if="job.id !== 'lumberjack'">
           <div class="arrow-group normal-arrows">
-            <div @click="adjustJob(job.id, 1)" class="upBtn" title="+1"></div>
-            <div @click="adjustJob(job.id, -1)" class="dnBtn" title="-1"></div>
+            <div @click="gameStore.adjustJobCount(job.id, 1)" class="upBtn" title="+1"></div>
+            <div @click="gameStore.adjustJobCount(job.id, -1)" class="dnBtn" title="-1"></div>
           </div>
-          <!-- 第二组按钮：+10/-10 -->
           <div class="arrow-group quick-arrows">
-            <div
-              @click="quickAdjustJob(job.id, 10)"
-              class="upManyBtn"
-              title="+10"
-            ></div>
-            <div
-              @click="quickAdjustJob(job.id, -10)"
-              class="dnManyBtn"
-              title="-10"
-            ></div>
+            <div @click="gameStore.adjustJobCount(job.id, 10)" class="upManyBtn" title="+10" ></div>
+            <div @click="gameStore.adjustJobCount(job.id, -10)" class="dnManyBtn" title="-10" ></div>
           </div>
         </div>
+        <div class="arrow-groups" v-else></div>
         <!-- Tooltip -->
         <div class="tooltip" v-if="activeTooltip === job.id">
           <div class="tooltip-content">
@@ -68,8 +53,12 @@ const activeTooltip = ref(null);
 // 工种类型
 const jobTypes = computed(() => {
   return defaultSettings.jobs.types.filter(job => {
-    // 如果狩猎小屋未解锁，过滤掉猎人、熏肉师
-    if (!gameStore.huntingCabinUnlocked && (job.id === 'hunter' || job.id === 'butcher')) {
+    // 如果狩猎小屋未解锁，过滤掉猎人
+    if (!gameStore.huntingCabinUnlocked && job.id === 'hunter') {
+      return false;
+    }
+    // 如果熏肉小屋未解锁，过滤掉熏肉师
+    if (!gameStore.smokehouseCabinUnlocked && job.id === 'butcher') {
       return false;
     }
     // 如果制革小屋未解锁，过滤掉皮革师
@@ -80,28 +69,9 @@ const jobTypes = computed(() => {
   });
 });
 
-// 闲散人员数量
-const idlePopulation = computed(() => {
-  const totalJobs = Object.values(gameStore.jobs).reduce(
-    (sum, count) => sum + count,
-    0
-  );
-  return Math.max(0, gameStore.population - totalJobs);
-});
-
 // 获取工种人数
 const jobCount = (jobId) => {
   return gameStore.jobs[jobId] || 0;
-};
-
-// 调整工种人数
-const adjustJob = (jobId, change) => {
-  gameStore.adjustJobCount(jobId, change);
-};
-
-// 快速调整工种人数
-const quickAdjustJob = (jobId, change) => {
-  gameStore.quickAdjustJobCount(jobId, change);
 };
 
 // 显示/隐藏tooltip
@@ -120,9 +90,6 @@ const getJobEffects = (job) => {
   
   // 计算效率乘数，考虑石斧的影响
   let efficiencyMultiplier = 1;
-  if (gameStore.stoneAxeUnlocked && (job.id === 'lumberjack' || job.id === 'miner')) {
-    efficiencyMultiplier = 2;
-  }
   
   // 处理木材
   if (job.wood) {
@@ -130,11 +97,6 @@ const getJobEffects = (job) => {
   }
   if (job.consume_wood) {
     effects.push({ name: '木材', change: -job.consume_wood * count });
-  }
-  
-  // 处理石头
-  if (job.stone) {
-    effects.push({ name: '石头', change: job.stone * count * efficiencyMultiplier });
   }
   
   // 处理生肉
@@ -189,19 +151,6 @@ const getJobEffects = (job) => {
     color: @text-color;
   }
 
-  .job-info {
-    margin-bottom: 8px;
-
-    .idle-population {
-      display: flex;
-      justify-content: space-between;
-      color: @text-color;
-      padding: 2px 4px;
-      background-color: @bg-light-color;
-      border-radius: 3px;
-    }
-  }
-
   .jobs-list {
     display: flex;
     flex-direction: column;
@@ -228,7 +177,8 @@ const getJobEffects = (job) => {
       .arrow-groups {
         display: flex;
         align-items: center;
-        gap: 5px;
+        gap: 4px;
+        width: 28px;
       }
 
       .arrow-group {
@@ -407,13 +357,6 @@ body.light-mode {
     .job-module-title {
       color: @light-text-color;
       border-bottom: 1px solid @light-border-hover-color;
-    }
-
-    .job-info {
-      .idle-population {
-        color: @light-text-color;
-        background-color: @light-bg-light-color;
-      }
     }
 
     .jobs-list {

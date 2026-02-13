@@ -7,6 +7,7 @@
     :style="customStyle"
   >
     <slot></slot>
+    <div class="count-badge" v-if="count !== undefined">{{ count }}</div>
   </button>
 </template>
 
@@ -31,6 +32,10 @@ const props = defineProps({
   customStyle: {
     type: Object,
     default: () => ({})
+  },
+  count: {
+    type: [Number, String],
+    default: undefined
   }
 })
 
@@ -47,6 +52,7 @@ const handleClick = () => {
 @import '@/styles/variable.less';
 
 button {
+  position: relative;
   display: block;
   width: 100%;
   max-width: 120px;
@@ -77,6 +83,23 @@ button {
   
   &:active:not(:disabled) {
     transform: translateY(1px);
+  }
+
+  .count-badge {
+    position: absolute;
+    min-width: 18px;
+    height: 16px;
+    line-height: 16px;
+    text-indent: 1px;
+    top: 0;
+    right: 0;
+    border-radius: 0 0 0 3px;
+    background-color: @primary-color;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 10;
   }
 }
 
@@ -143,6 +166,11 @@ body.light-mode {
     
     &:hover:not(:disabled) {
       background-color: @light-bg-light-color;
+    }
+
+    .count-badge {
+      background-color: #999;
+      color: #fff;
     }
   }
   

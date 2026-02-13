@@ -2,20 +2,13 @@
 const defaultSettings = {
   // 村落解锁配置
   village: {
-    unlockWoodCost: 10, // 解锁村落需要的木材
-    unlockStoneCost: 10 // 解锁村落需要的石头
+    unlockWoodCost: 20 // 解锁村落需要的木材
   },
   // 收集配置
   collection: {
     // 木材配置
     wood: {
-      amount: 5, // 每次收集的数量
-      cooldown: 5, // 冷却时间（秒）
-      maxCooldown: 5 // 最大冷却时间（秒）
-    },
-    // 石头配置
-    stone: {
-      amount: 5, // 每次收集的数量
+      amount: 10, // 每次收集的数量
       cooldown: 5, // 冷却时间（秒）
       maxCooldown: 5 // 最大冷却时间（秒）
     }
@@ -24,24 +17,19 @@ const defaultSettings = {
   building: {
     // 小屋配置
     cabin: {
-      baseWoodCost: 50, // 基础木材需求
-      baseStoneCost: 50, // 基础石头需求
+      baseWoodCost: 100, // 基础木材需求
       woodCostIncreasePerLevel: 50, // 每级木材需求增加量
-      stoneCostIncreasePerLevel: 50, // 每级石头需求增加量
       maxPopulationPerCabin: 4 // 每间小屋最大人口
     },
     // 货车配置
     cart: {
-      woodCost: 20, // 解锁货车需要的木材
+      woodCost: 30, // 解锁货车需要的木材
       resourceIncrease: 2, // 每十秒增加的资源数量
-      interval: 10 // 增加资源的间隔（秒）
     },
     // 陷阱配置
     trap: {
       initialWoodCost: 10, // 首次部署需要的木材
-      initialStoneCost: 10, // 首次部署需要的石头
       woodCostIncrease: 10, // 每次部署增加的木材
-      stoneCostIncrease: 10, // 每次部署增加的石头
       maxTraps: 10, // 最多可部署的陷阱数量
       checkCooldown: 30, // 查看陷阱的冷却时间（秒）
       maxCheckCooldown: 30 // 查看陷阱的最大冷却时间（秒）
@@ -58,8 +46,7 @@ const defaultSettings = {
   buffs: {
     // 货车buff
     cart: {
-      wood: 2, // 每十秒增加木材
-      stone: 2, // 每十秒增加石头
+      wood: 2 // 每十秒增加木材
     }
   },
   // 工作模块配置
@@ -71,12 +58,6 @@ const defaultSettings = {
         name: '伐木工',
         description: '增加木材产量',
         wood: 1 // 每十秒增加木材
-      },
-      {
-        id: 'miner',
-        name: '采石工',
-        description: '增加石头产量',
-        stone: 1 // 每十秒增加石头
       },
       {
         id: 'hunter',
@@ -105,16 +86,25 @@ const defaultSettings = {
   // 狩猎小屋配置
   hunting: {
     cabin: {
-      woodCost: 250, // 解锁需要的木材
-      stoneCost: 250, // 解锁需要的石头
+      woodCost: 200, // 解锁需要的木材
+      furCost: 10, // 解锁需要的毛皮
+      meatCost: 10, // 解锁需要的生肉
+      unlockLevel: 2 // 解锁需要的小屋等级
+    }
+  },
+  // 熏肉小屋配置
+  smokehouse: {
+    cabin: {
+      woodCost: 300, // 解锁需要的木材
+      meatCost: 50, // 解锁需要的生肉
       unlockLevel: 3 // 解锁需要的小屋等级
     }
   },
   // 制革小屋配置
   tannery: {
     cabin: {
-      woodCost: 350, // 解锁需要的木材
-      stoneCost: 350, // 解锁需要的石头
+      woodCost: 400, // 解锁需要的木材
+      furCost: 50, // 解锁需要的毛皮
       unlockLevel: 5 // 解锁需要的小屋等级
     }
   },
@@ -122,21 +112,23 @@ const defaultSettings = {
   workshop: {
     cabin: {
       woodCost: 500, // 解锁需要的木材
-      stoneCost: 500, // 解锁需要的石头
+      meatCost: 150, // 解锁需要的生肉
+      furCost: 150, // 解锁需要的毛皮
       unlockLevel: 7 // 解锁需要的小屋等级
+    }
+  },
+  // 贸易站配置
+  tradingPost: {
+    cabin: {
+      woodCost: 600, // 解锁需要的木材
+      baconCost: 50, // 解锁需要的熏肉
+      leatherCost: 50, // 解锁需要的皮革
+      unlockLevel: 10 // 解锁需要的小屋等级
     }
   },
   // 制造配置
   crafting: {
     tools: [
-      {
-        id: 'stoneAxe',
-        name: '石斧',
-        woodCost: 30,
-        stoneCost: 50,
-        woodEfficiency: 10,
-        stoneEfficiency: 10
-      }
     ]
   },
   // 天灾系统配置

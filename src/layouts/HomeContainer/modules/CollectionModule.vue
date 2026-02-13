@@ -17,14 +17,6 @@
       @button-click="collectWood"
     />
     <CoolDownButton 
-      button-id="collectStone"
-      cooldown-bar-id="collectStoneCooldown"
-      button-text="收集石头"
-      :cooldown="gameStore.cooldowns.stone"
-      :max-cooldown="defaultSettings.collection.stone.maxCooldown"
-      @button-click="collectStone"
-    />
-    <CoolDownButton 
       v-if="gameStore.villageUnlocked"
       button-id="checkTraps"
       cooldown-bar-id="checkTrapsCooldown"
@@ -56,16 +48,12 @@ const collectWood = () => {
   gameStore.collectWood()
 }
 
-const collectStone = () => {
-  gameStore.collectStone()
-}
-
 const checkTraps = () => {
   gameStore.checkTraps()
 }
 
 const getFireButtonClass = () => {
-  return `fire-button-${gameStore.fireLevel}`
+  return `fire-button fire-button-${gameStore.fireLevel}`
 }
 </script>
 
@@ -77,9 +65,10 @@ const getFireButtonClass = () => {
 }
 
 /* 火堆按钮样式 */
-:deep(button.fire-button-0) {
+:deep(button.fire-button) {
   position: relative;
   overflow: hidden;
+  animation: backgroundPulse 2s ease-in-out infinite alternate;
 }
 
 :deep(button.fire-button-0)::before {
@@ -95,12 +84,10 @@ const getFireButtonClass = () => {
   opacity: 0.5;
 }
 
-:deep(button.fire-button-1) {
+:deep(button.fire-button-1), :deep(button.fire-button-1:not(:disabled):hover) {
   border-color: #8B4513;
   color: #CD853F;
   background-color: rgba(139, 69, 19, 0.15);
-  position: relative;
-  overflow: hidden;
   box-shadow: inset 0 0 15px rgba(139, 69, 19, 0.5);
 }
 
@@ -118,12 +105,10 @@ const getFireButtonClass = () => {
   animation: burn 5s ease-in-out infinite alternate;
 }
 
-:deep(button.fire-button-2) {
+:deep(button.fire-button-2), :deep(button.fire-button-2:not(:disabled):hover) {
   border-color: #CD853F;
   color: #FF8C00;
   background-color: rgba(205, 133, 63, 0.2);
-  position: relative;
-  overflow: hidden;
   box-shadow: inset 0 0 15px rgba(205, 133, 63, 0.5);
 }
 
@@ -141,12 +126,10 @@ const getFireButtonClass = () => {
   animation: burn 4s ease-in-out infinite alternate;
 }
 
-:deep(button.fire-button-3) {
+:deep(button.fire-button-3), :deep(button.fire-button-3:not(:disabled):hover) {
   border-color: #FF8C00;
   color: #FFA500;
   background-color: rgba(255, 140, 0, 0.25);
-  position: relative;
-  overflow: hidden;
   box-shadow: inset 0 0 15px rgba(255, 140, 0, 0.5);
 }
 
@@ -164,12 +147,10 @@ const getFireButtonClass = () => {
   animation: burn 3s ease-in-out infinite alternate;
 }
 
-:deep(button.fire-button-4) {
+:deep(button.fire-button-4), :deep(button.fire-button-4:not(:disabled):hover) {
   border-color: #FF4500;
   color: #FF6347;
   background-color: rgba(255, 69, 0, 0.3);
-  position: relative;
-  overflow: hidden;
   box-shadow: inset 0 0 15px rgba(255, 69, 0, 0.5);
 }
 
@@ -207,6 +188,18 @@ const getFireButtonClass = () => {
   100% {
     transform: translateX(-50%) scaleY(1) scaleX(1);
     opacity: 0.8;
+  }
+}
+
+@keyframes backgroundPulse {
+  0% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.9;
   }
 }
 

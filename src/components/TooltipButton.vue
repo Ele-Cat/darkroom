@@ -4,6 +4,7 @@
       :buttonId="buttonId"
       :disabled="disabled"
       :className="buttonClass"
+      :count="count"
       @button-click="handleClick"
       @mouseenter="!disabled && (showTooltip = true)"
       @mouseleave="showTooltip = false"
@@ -44,6 +45,10 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  count: {
+    type: [Number, String],
+    default: undefined
   }
 })
 

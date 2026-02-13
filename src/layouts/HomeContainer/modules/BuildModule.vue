@@ -9,6 +9,7 @@
         button-text="布置陷阱"
         :tooltip-text="getTrapTooltip()"
         :disabled="gameStore.traps >= defaultSettings.building.trap.maxTraps"
+        :count="gameStore.traps"
         @button-click="deployTrap"
       />
       
@@ -17,7 +18,8 @@
         button-id="buildStructure"
         button-text="居住小屋"
         :tooltip-text="getBuildCostTooltip()"
-        :disabled="gameStore.villageLevel >= 50"
+        :disabled="gameStore.villageLevel >= 30"
+        :count="gameStore.villageLevel"
         @button-click="buildStructure"
       />
       
@@ -29,6 +31,16 @@
         :tooltip-text="getHuntingCabinTooltip()"
         :disabled="gameStore.huntingCabinUnlocked"
         @button-click="unlockHuntingCabin"
+      />
+      
+      <!-- 熏肉小屋按钮 -->
+      <TooltipButton 
+        v-if="gameStore.huntingCabinUnlocked && gameStore.villageLevel >= defaultSettings.smokehouse.cabin.unlockLevel"
+        button-id="unlockSmokehouseCabin"
+        button-text="熏肉小屋"
+        :tooltip-text="getSmokehouseCabinTooltip()"
+        :disabled="gameStore.smokehouseCabinUnlocked"
+        @button-click="unlockSmokehouseCabin"
       />
       
       <!-- 制革小屋按钮 -->
@@ -49,6 +61,16 @@
         :tooltip-text="getWorkshopTooltip()"
         :disabled="gameStore.workshopUnlocked"
         @button-click="unlockWorkshop"
+      />
+      
+      <!-- 贸易站按钮 -->
+      <TooltipButton 
+        v-if="gameStore.villageLevel >= defaultSettings.tradingPost.cabin.unlockLevel"
+        button-id="unlockTradingPost"
+        button-text="贸易站"
+        :tooltip-text="getTradingPostTooltip()"
+        :disabled="gameStore.tradingPostUnlocked"
+        @button-click="unlockTradingPost"
       />
     </div>
   </div>
@@ -82,16 +104,12 @@ const unlockWorkshop = () => {
   gameStore.unlockWorkshop()
 }
 
-const getBuildCostTooltip = () => {
-  const baseWoodCost = defaultSettings.building.cabin.baseWoodCost
-  const baseStoneCost = defaultSettings.building.cabin.baseStoneCost
-  const woodCostIncreasePerLevel = defaultSettings.building.cabin.woodCostIncreasePerLevel
-  const stoneCostIncreasePerLevel = defaultSettings.building.cabin.stoneCostIncreasePerLevel
-  
-  const woodCost = baseWoodCost + Math.floor(gameStore.villageLevel * woodCostIncreasePerLevel)
-  const stoneCost = baseStoneCost + Math.floor(gameStore.villageLevel * stoneCostIncreasePerLevel)
-  
-  return `木材 ${woodCost}, 石头 ${stoneCost}`
+const unlockSmokehouseCabin = () => {
+  gameStore.unlockSmokehouseCabin()
+}
+
+const unlockTradingPost = () => {
+  gameStore.unlockTradingPost()
 }
 
 const getTrapTooltip = () => {
@@ -99,27 +117,40 @@ const getTrapTooltip = () => {
     return `陷阱已达到最大数量${defaultSettings.building.trap.maxTraps}个`
   } else {
     const initialWoodCost = defaultSettings.building.trap.initialWoodCost
-    const initialStoneCost = defaultSettings.building.trap.initialStoneCost
     const woodCostIncrease = defaultSettings.building.trap.woodCostIncrease
-    const stoneCostIncrease = defaultSettings.building.trap.stoneCostIncrease
     
     const woodCost = initialWoodCost + gameStore.traps * woodCostIncrease
-    const stoneCost = initialStoneCost + gameStore.traps * stoneCostIncrease
     
-    return `木材 ${woodCost}, 石头 ${stoneCost}`
+    return `木材 ${woodCost}`
   }
 }
 
+const getBuildCostTooltip = () => {
+  const baseWoodCost = defaultSettings.building.cabin.baseWoodCost
+  const woodCostIncreasePerLevel = defaultSettings.building.cabin.woodCostIncreasePerLevel
+  const woodCost = baseWoodCost + Math.floor(gameStore.villageLevel * woodCostIncreasePerLevel)
+  
+  return `木材 ${woodCost}`
+}
+
 const getHuntingCabinTooltip = () => {
-  return `木材 ${defaultSettings.hunting.cabin.woodCost}, 石头 ${defaultSettings.hunting.cabin.stoneCost}`
+  return `木材 ${defaultSettings.hunting.cabin.woodCost}, 毛皮 ${defaultSettings.hunting.cabin.furCost}, 生肉 ${defaultSettings.hunting.cabin.meatCost}`
+}
+
+const getSmokehouseCabinTooltip = () => {
+  return `木材 ${defaultSettings.smokehouse.cabin.woodCost}, 生肉 ${defaultSettings.smokehouse.cabin.meatCost}`
 }
 
 const getTanneryCabinTooltip = () => {
-  return `木材 ${defaultSettings.tannery.cabin.woodCost}, 石头 ${defaultSettings.tannery.cabin.stoneCost}`
+  return `木材 ${defaultSettings.tannery.cabin.woodCost}, 毛皮 ${defaultSettings.tannery.cabin.furCost}`
 }
 
 const getWorkshopTooltip = () => {
-  return `木材 ${defaultSettings.workshop.cabin.woodCost}, 石头 ${defaultSettings.workshop.cabin.stoneCost}`
+  return `木材 ${defaultSettings.workshop.cabin.woodCost}, 生肉 ${defaultSettings.workshop.cabin.meatCost}, 毛皮 ${defaultSettings.workshop.cabin.furCost}`
+}
+
+const getTradingPostTooltip = () => {
+  return `木材 ${defaultSettings.tradingPost.cabin.woodCost}, 熏肉 ${defaultSettings.tradingPost.cabin.baconCost}, 皮革 ${defaultSettings.tradingPost.cabin.leatherCost}`
 }
 </script>
 

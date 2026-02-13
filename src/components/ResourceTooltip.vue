@@ -24,8 +24,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 import defaultSettings from '@/config/defaultSettings'
+const gameStore = inject('gameStore')
 
 const props = defineProps({
   resourceName: {
@@ -40,36 +41,10 @@ const props = defineProps({
     type: String,
     required: true
   },
-  buffType: {
-    type: String,
-    default: ''
-  },
-  buffChange: {
-    type: String,
-    default: ''
-  },
   netChange: {
     type: Number,
     default: 0
   },
-  jobs: {
-    type: Object,
-    default: () => ({
-      lumberjack: 0,
-      miner: 0,
-      hunter: 0,
-      butcher: 0,
-      tanner: 0
-    })
-  },
-  cartUnlocked: {
-    type: Boolean,
-    default: false
-  },
-  stoneAxeUnlocked: {
-    type: Boolean,
-    default: false
-  }
 })
 
 const showTooltip = ref(false)
@@ -78,7 +53,6 @@ const showTooltip = ref(false)
 const allEffects = computed(() => {
   const effects = []
   const resourceKey = props.resourceName === '木材' ? 'wood' : 
-                    props.resourceName === '石头' ? 'stone' :
                     props.resourceName === '生肉' ? 'meat' :
                     props.resourceName === '毛皮' ? 'fur' :
                     props.resourceName === '熏肉' ? 'bacon' :
@@ -87,7 +61,7 @@ const allEffects = computed(() => {
   if (resourceKey) {
     // 货车对物料的影响
     const cartBuff = defaultSettings.buffs.cart[resourceKey]
-    if (cartBuff > 0 && props.cartUnlocked) {
+    if (cartBuff > 0 && gameStore.cartUnlocked) {
       effects.push({
         type: '货车',
         change: `+${cartBuff}/10s`
@@ -95,14 +69,11 @@ const allEffects = computed(() => {
     }
     
     // 伐木工对木材的影响
-    if (resourceKey === 'wood' && props.jobs && props.jobs.lumberjack > 0) {
+    if (resourceKey === 'wood' && gameStore.jobs && gameStore.jobs.lumberjack > 0) {
       const lumberjackBuff = defaultSettings.jobs.types.find(job => job.id === 'lumberjack')
       if (lumberjackBuff) {
         let efficiencyMultiplier = 1
-        if (props.stoneAxeUnlocked) {
-          efficiencyMultiplier = 2
-        }
-        const change = props.jobs.lumberjack * lumberjackBuff.wood * efficiencyMultiplier
+        const change = gameStore.jobs.lumberjack * lumberjackBuff.wood * efficiencyMultiplier
         effects.push({
           type: '伐木工',
           change: `+${change}/10s`
@@ -110,27 +81,11 @@ const allEffects = computed(() => {
       }
     }
     
-    // 采石工对石头的影响
-    if (resourceKey === 'stone' && props.jobs && props.jobs.miner > 0) {
-      const minerBuff = defaultSettings.jobs.types.find(job => job.id === 'miner')
-      if (minerBuff) {
-        let efficiencyMultiplier = 1
-        if (props.stoneAxeUnlocked) {
-          efficiencyMultiplier = 2
-        }
-        const change = props.jobs.miner * minerBuff.stone * efficiencyMultiplier
-        effects.push({
-          type: '采石工',
-          change: `+${change}/10s`
-        })
-      }
-    }
-    
     // 猎人对生肉和毛皮的影响
-    if ((resourceKey === 'meat' || resourceKey === 'fur') && props.jobs && props.jobs.hunter > 0) {
+    if ((resourceKey === 'meat' || resourceKey === 'fur') && gameStore.jobs && gameStore.jobs.hunter > 0) {
       const hunterBuff = defaultSettings.jobs.types.find(job => job.id === 'hunter')
       if (hunterBuff) {
-        const change = props.jobs.hunter * hunterBuff[resourceKey]
+        const change = gameStore.jobs.hunter * hunterBuff[resourceKey]
         effects.push({
           type: '猎人',
           change: `+${change}/10s`
@@ -139,10 +94,10 @@ const allEffects = computed(() => {
     }
     
     // 熏肉师对熏肉的影响（同时消耗生肉和木材）
-    if (resourceKey === 'bacon' && props.jobs && props.jobs.butcher > 0) {
+    if (resourceKey === 'bacon' && gameStore.jobs && gameStore.jobs.butcher > 0) {
       const butcherBuff = defaultSettings.jobs.types.find(job => job.id === 'butcher')
       if (butcherBuff) {
-        const change = props.jobs.butcher * butcherBuff.bacon
+        const change = gameStore.jobs.butcher * butcherBuff.bacon
         effects.push({
           type: '熏肉师',
           change: `+${change}/10s`
@@ -151,10 +106,10 @@ const allEffects = computed(() => {
     }
     
     // 熏肉师消耗木材
-    if (resourceKey === 'wood' && props.jobs && props.jobs.butcher > 0) {
+    if (resourceKey === 'wood' && gameStore.jobs && gameStore.jobs.butcher > 0) {
       const butcherBuff = defaultSettings.jobs.types.find(job => job.id === 'butcher')
       if (butcherBuff) {
-        const change = props.jobs.butcher * butcherBuff.consume_wood
+        const change = gameStore.jobs.butcher * butcherBuff.consume_wood
         effects.push({
           type: '熏肉师',
           change: `-${change}/10s`
@@ -163,10 +118,10 @@ const allEffects = computed(() => {
     }
     
     // 熏肉师消耗生肉
-    if (resourceKey === 'meat' && props.jobs && props.jobs.butcher > 0) {
+    if (resourceKey === 'meat' && gameStore.jobs && gameStore.jobs.butcher > 0) {
       const butcherBuff = defaultSettings.jobs.types.find(job => job.id === 'butcher')
       if (butcherBuff) {
-        const change = props.jobs.butcher * butcherBuff.consume_meat
+        const change = gameStore.jobs.butcher * butcherBuff.consume_meat
         effects.push({
           type: '熏肉师',
           change: `-${change}/10s`
@@ -175,10 +130,10 @@ const allEffects = computed(() => {
     }
     
     // 皮革师对皮革的影响
-    if (resourceKey === 'leather' && props.jobs && props.jobs.tanner > 0) {
+    if (resourceKey === 'leather' && gameStore.jobs && gameStore.jobs.tanner > 0) {
       const tannerBuff = defaultSettings.jobs.types.find(job => job.id === 'tanner')
       if (tannerBuff) {
-        const change = props.jobs.tanner * tannerBuff.leather
+        const change = gameStore.jobs.tanner * tannerBuff.leather
         effects.push({
           type: '皮革师',
           change: `+${change}/10s`
@@ -187,10 +142,10 @@ const allEffects = computed(() => {
     }
     
     // 皮革师消耗毛皮
-    if (resourceKey === 'fur' && props.jobs && props.jobs.tanner > 0) {
+    if (resourceKey === 'fur' && gameStore.jobs && gameStore.jobs.tanner > 0) {
       const tannerBuff = defaultSettings.jobs.types.find(job => job.id === 'tanner')
       if (tannerBuff) {
-        const change = props.jobs.tanner * tannerBuff.consume_fur
+        const change = gameStore.jobs.tanner * tannerBuff.consume_fur
         effects.push({
           type: '皮革师',
           change: `-${change}/10s`
