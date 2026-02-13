@@ -490,11 +490,17 @@ export const useGameStore = defineStore('game', {
         this.jobs[jobId] = 0
       }
       
+      // 计算除当前工种和伐木工外的其他工种总人数
+      const otherJobsTotal = Object.entries(this.jobs).reduce((sum, [key, count]) => {
+        return (key !== jobId && key !== 'lumberjack') ? sum + count : sum
+      }, 0)
+      
       // 计算调整后的目标工种人数
       let newJobCount
       if (change > 0) {
-        // 增加人数：不能超过总人口
-        newJobCount = Math.min(this.jobs[jobId] + change, this.population)
+        // 增加人数：不能超过总人口减去其他工种的人数
+        const maxJobCount = this.population - otherJobsTotal
+        newJobCount = Math.min(this.jobs[jobId] + change, maxJobCount)
       } else {
         // 减少人数：至少为0
         newJobCount = Math.max(0, this.jobs[jobId] + change)
@@ -511,14 +517,8 @@ export const useGameStore = defineStore('game', {
       // 更新目标工种人数
       this.jobs[jobId] = newJobCount
       
-      // 计算所有其他工种的总人数
-      const otherJobsTotal = Object.values(this.jobs).reduce((sum, count, index, array) => {
-        const jobIds = Object.keys(this.jobs)
-        return jobIds[index] === 'lumberjack' ? sum : sum + count
-      }, 0)
-      
       // 自动调整伐木工人数，确保总工作人数等于总人口
-      this.jobs.lumberjack = Math.max(0, this.population - otherJobsTotal)
+      this.jobs.lumberjack = Math.max(0, this.population - otherJobsTotal - this.jobs[jobId])
       
       this.saveGameState()
     },
