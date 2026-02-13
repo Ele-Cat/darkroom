@@ -32,22 +32,6 @@
             :buff-type="''"
             :buff-change="''"
             :net-change="gameStore.materialBuffs.wood"
-            :jobs="gameStore.jobs"
-            :cart-unlocked="gameStore.cartUnlocked"
-            :stone-axe-unlocked="gameStore.stoneAxeUnlocked"
-          />
-        </div>
-        <div class="resource">
-          <ResourceTooltip 
-            resource-name="石头"
-            :resource-amount="Math.floor(gameStore.stone)"
-            resource-id="stoneCount"
-            :buff-type="''"
-            :buff-change="''"
-            :net-change="gameStore.materialBuffs.stone"
-            :jobs="gameStore.jobs"
-            :cart-unlocked="gameStore.cartUnlocked"
-            :stone-axe-unlocked="gameStore.stoneAxeUnlocked"
           />
         </div>
         <div class="resource" v-if="gameStore.huntingCabinUnlocked || gameStore.traps > 0 || gameStore.meat > 0 || gameStore.fur > 0">
@@ -55,11 +39,7 @@
             resource-name="生肉"
             :resource-amount="Math.floor(gameStore.meat)"
             resource-id="meatCount"
-            :buff-type="''"
-            :buff-change="''"
             :net-change="gameStore.materialBuffs.meat"
-            :jobs="gameStore.jobs"
-            :cart-unlocked="gameStore.cartUnlocked"
           />
         </div>
         <div class="resource" v-if="gameStore.huntingCabinUnlocked || gameStore.traps > 0 || gameStore.meat > 0 || gameStore.fur > 0">
@@ -67,23 +47,15 @@
             resource-name="毛皮"
             :resource-amount="Math.floor(gameStore.fur)"
             resource-id="furCount"
-            :buff-type="''"
-            :buff-change="''"
             :net-change="gameStore.materialBuffs.fur"
-            :jobs="gameStore.jobs"
-            :cart-unlocked="gameStore.cartUnlocked"
           />
         </div>
-        <div class="resource" v-if="gameStore.huntingCabinUnlocked">
+        <div class="resource" v-if="gameStore.smokehouseCabinUnlocked || gameStore.bacon > 0">
           <ResourceTooltip 
             resource-name="熏肉"
             :resource-amount="Math.floor(gameStore.bacon)"
             resource-id="baconCount"
-            :buff-type="''"
-            :buff-change="''"
             :net-change="gameStore.materialBuffs.bacon"
-            :jobs="gameStore.jobs"
-            :cart-unlocked="gameStore.cartUnlocked"
           />
         </div>
         <div class="resource" v-if="gameStore.tanneryCabinUnlocked">
@@ -91,11 +63,7 @@
             resource-name="皮革"
             :resource-amount="Math.floor(gameStore.leather)"
             resource-id="leatherCount"
-            :buff-type="''"
-            :buff-change="''"
             :net-change="gameStore.materialBuffs.leather"
-            :jobs="gameStore.jobs"
-            :cart-unlocked="gameStore.cartUnlocked"
           />
         </div>
       </div>

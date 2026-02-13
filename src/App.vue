@@ -73,7 +73,7 @@ onMounted(() => {
   gameLoopInterval = setTimeout(gameLoop, 10)
   
   // 初始化任务进场话术
-  gameStore.fireLevel === 0 && gameStore.initGameLog()
+  gameStore.fireLevel === 0 && gameStore.wood === 0 && gameStore.initGameLog()
   
   // 监听新村民到来事件，切换到村落tab
   eventBus.on('newVillagersArrived', () => {
@@ -86,6 +86,12 @@ onMounted(() => {
   // 监听灾难确认事件，处理后续逻辑
   eventBus.on('disasterConfirmed', (disaster) => {
     gameStore.handleDisasterConfirm(disaster)
+  })
+  
+  // 监听重置标签页事件
+  eventBus.on('resetTab', () => {
+    activeTab.value = 'cabin'
+    updateBrowserTitle('cabin')
   })
 })
 

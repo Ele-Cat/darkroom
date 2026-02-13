@@ -4,7 +4,6 @@
   <div class="tab-content" v-else>
     <div class="cabin-layout">
       <div class="actions">
-        <!-- 小屋：展示收集木材、收集石头 -->
         <CollectionModule />
 
         <BuildModule v-if="activeTab === 'cabin' && gameStore.villageUnlocked" />
