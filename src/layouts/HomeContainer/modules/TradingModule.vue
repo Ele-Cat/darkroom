@@ -4,10 +4,7 @@
       <p class="build-type">交易：</p>
       <div class="trade-items">
         <div class="trade-placeholder">
-          交易物品1
-        </div>
-        <div class="trade-placeholder">
-          交易物品2
+          敬请期待
         </div>
       </div>
     </div>

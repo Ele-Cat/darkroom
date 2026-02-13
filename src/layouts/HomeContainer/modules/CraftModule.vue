@@ -10,6 +10,12 @@
         :disabled="gameStore.cartUnlocked"
         @button-click="unlockCart"
       />
+
+      <TooltipButton 
+        v-if="gameStore.workshopUnlocked"
+        button-text="假装可以制造东西"
+        tooltip-text="骗你的 点击没用"
+      />
     </div>
   </div>
 </template>
