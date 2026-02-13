@@ -246,7 +246,7 @@ export const useGameStore = defineStore('game', {
       if (this.wood >= woodCost) {
         this.wood -= woodCost
         this.villageLevel += 1
-        this.addLog('你建造了小屋', 1)
+        this.addLog('你建造了居住小屋', 1)
         if (this.villageLevel === 1) {
           this.addLog(`消息不胫而走，将会有居民入住你的村落`, 1)
         }
@@ -374,12 +374,12 @@ export const useGameStore = defineStore('game', {
       if (!this.checkFireLevel('解锁操作')) return
       
       const woodCost = defaultSettings.tradingPost.cabin.woodCost
-      const meatCost = defaultSettings.tradingPost.cabin.meatCost
-      const furCost = defaultSettings.tradingPost.cabin.furCost
-      if (!this.tradingPostUnlocked && this.wood >= woodCost && this.meat >= meatCost && this.fur >= furCost) {
+      const baconCost = defaultSettings.tradingPost.cabin.baconCost
+      const leatherCost = defaultSettings.tradingPost.cabin.leatherCost
+      if (!this.tradingPostUnlocked && this.wood >= woodCost && this.bacon >= baconCost && this.leather >= leatherCost) {
         this.wood -= woodCost
-        this.meat -= meatCost
-        this.fur -= furCost
+        this.bacon -= baconCost
+        this.leather -= leatherCost
         this.tradingPostUnlocked = true
         this.addLog('你解锁了贸易站，可以购买物品', 1)
         this.saveGameState()
@@ -396,12 +396,12 @@ export const useGameStore = defineStore('game', {
       if (!this.checkFireLevel('解锁操作')) return
       
       const woodCost = defaultSettings.workshop.cabin.woodCost
-      const baconCost = defaultSettings.workshop.cabin.baconCost
-      const leatherCost = defaultSettings.workshop.cabin.leatherCost
-      if (!this.workshopUnlocked && this.wood >= woodCost && this.bacon >= baconCost && this.leather >= leatherCost) {
+      const meatCost = defaultSettings.workshop.cabin.meatCost
+      const furCost = defaultSettings.workshop.cabin.furCost
+      if (!this.workshopUnlocked && this.wood >= woodCost && this.meat >= meatCost && this.fur >= furCost) {
         this.wood -= woodCost
-        this.bacon -= baconCost
-        this.leather -= leatherCost
+        this.meat -= meatCost
+        this.fur -= furCost
         this.workshopUnlocked = true
         this.addLog('你解锁了工坊建筑', 1)
         this.saveGameState()

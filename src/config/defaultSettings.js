@@ -103,17 +103,8 @@ const defaultSettings = {
   // 制革小屋配置
   tannery: {
     cabin: {
-      woodCost: 350, // 解锁需要的木材
-      furCost: 50, // 解锁需要的毛皮
-      unlockLevel: 5 // 解锁需要的小屋等级
-    }
-  },
-  // 贸易站配置
-  tradingPost: {
-    cabin: {
       woodCost: 400, // 解锁需要的木材
-      meatCost: 100, // 解锁需要的生肉
-      furCost: 100, // 解锁需要的毛皮
+      furCost: 50, // 解锁需要的毛皮
       unlockLevel: 5 // 解锁需要的小屋等级
     }
   },
@@ -121,9 +112,18 @@ const defaultSettings = {
   workshop: {
     cabin: {
       woodCost: 500, // 解锁需要的木材
-      baconCost: 100, // 解锁需要的熏肉
-      leatherCost: 100, // 解锁需要的皮革
+      meatCost: 150, // 解锁需要的生肉
+      furCost: 150, // 解锁需要的毛皮
       unlockLevel: 7 // 解锁需要的小屋等级
+    }
+  },
+  // 贸易站配置
+  tradingPost: {
+    cabin: {
+      woodCost: 600, // 解锁需要的木材
+      baconCost: 50, // 解锁需要的熏肉
+      leatherCost: 50, // 解锁需要的皮革
+      unlockLevel: 10 // 解锁需要的小屋等级
     }
   },
   // 制造配置
