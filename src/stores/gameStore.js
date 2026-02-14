@@ -13,8 +13,6 @@ export const useGameStore = defineStore('game', {
       bacon: 0, // 熏肉数量
       leather: 0 // 皮革数量
     },
-    // 火堆定时器，用于追踪上次添柴的时间
-    fireTimer: 0,
     // 火堆状态名称
     fireLevelNames: ['熄灭', '火光微弱', '轻轻闪烁', '燃烧着', '熊熊燃烧'],
     // 火堆状态对应的音效
@@ -31,6 +29,7 @@ export const useGameStore = defineStore('game', {
     // 建筑解锁状态
     buildings: {
       fire: 0, // 火堆状态：0-熄灭，1-闷烧，2-闪烁，3-燃烧，4-咆哮
+      fireTimer: 0, // 火堆定时器，用于追踪上次添柴的时间
       village: -1, // 村落等级
       cart: 0, // 货车是否解锁（0-未解锁，1-已解锁）
       huntingCabin: 0, // 狩猎小屋是否解锁
@@ -199,7 +198,7 @@ export const useGameStore = defineStore('game', {
       // 消耗木材
       this.stores.wood -= 1
       // 重置火堆定时器
-      this.fireTimer = 0
+      this.buildings.fireTimer = 0
       
       // 处理火堆状态变化
       if (this.buildings.fire === 0) {
@@ -699,10 +698,10 @@ export const useGameStore = defineStore('game', {
         
         // 火堆状态降级逻辑：每二十分钟不添柴火堆就会降一等级直至熄灭
         if (this.buildings.fire > 0) {
-          this.fireTimer += 0.1 // 每次增加0.1秒
+          this.buildings.fireTimer += 0.1 // 每次增加0.1秒
           // 20分钟 = 1200秒
-          if (this.fireTimer >= 60 * 20) {
-            this.fireTimer = 0 // 重置定时器
+          if (this.buildings.fireTimer >= 60 * 20) {
+            this.buildings.fireTimer = 0 // 重置定时器
             if (this.buildings.fire > 1) {
               this.buildings.fire -= 1
               this.addLog(`火堆许久没有添柴，火焰渐渐微弱`)
@@ -942,11 +941,11 @@ export const useGameStore = defineStore('game', {
             bacon: this.stores.bacon,
             leather: this.stores.leather
           },
-          fireTimer: this.fireTimer,
           darkMode: this.darkMode,
           population: this.population,
           buildings: {
             fire: this.buildings.fire,
+            fireTimer: this.buildings.fireTimer,
             village: this.buildings.village,
             cart: this.buildings.cart,
             huntingCabin: this.buildings.huntingCabin,
@@ -980,12 +979,12 @@ export const useGameStore = defineStore('game', {
             this.stores.leather = loadedState.stores.leather || 0
           }
           
-          this.fireTimer = loadedState.fireTimer || 0
           this.darkMode = loadedState.darkMode || false
           this.population = loadedState.population || 0
           
           if (loadedState.buildings) {
             this.buildings.fire = loadedState.buildings.fire || 0
+            this.buildings.fireTimer = loadedState.buildings.fireTimer || 0
             this.buildings.village = loadedState.buildings.village || 0
             this.buildings.cart = loadedState.buildings.cart || 0
             this.buildings.huntingCabin = loadedState.buildings.huntingCabin || 0
@@ -1034,11 +1033,11 @@ export const useGameStore = defineStore('game', {
             bacon: this.stores.bacon,
             leather: this.stores.leather
           },
-          fireTimer: this.fireTimer,
           darkMode: this.darkMode,
           population: this.population,
           buildings: {
             fire: this.buildings.fire,
+            fireTimer: this.buildings.fireTimer,
             village: this.buildings.village,
             cart: this.buildings.cart,
             huntingCabin: this.buildings.huntingCabin,
@@ -1074,12 +1073,12 @@ export const useGameStore = defineStore('game', {
             this.stores.leather = loadedState.stores.leather || 0
           }
           
-          this.fireTimer = loadedState.fireTimer || 0
           this.darkMode = loadedState.darkMode || false
           this.population = loadedState.population || 0
           
           if (loadedState.buildings) {
             this.buildings.fire = loadedState.buildings.fire || 0
+            this.buildings.fireTimer = loadedState.buildings.fireTimer || 0
             this.buildings.village = loadedState.buildings.village || 0
             this.buildings.cart = loadedState.buildings.cart || 0
             this.buildings.huntingCabin = loadedState.buildings.huntingCabin || 0
