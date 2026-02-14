@@ -4,15 +4,15 @@
       <p class="build-type">制造：</p>
       <!-- 货车按钮 -->
       <TooltipButton 
-        button-id="unlockCart"
-        button-text="货车"
-        :tooltip-text="getCartTooltip()"
-        :disabled="gameStore.cartUnlocked"
-        @button-click="unlockCart"
-      />
+          button-id="unlockCart"
+          button-text="货车"
+          :tooltip-text="getCartTooltip()"
+          :disabled="gameStore.buildings.cart"
+          @button-click="gameStore.unlockCart()"
+        />
 
       <TooltipButton 
-        v-if="gameStore.workshopUnlocked"
+        v-if="gameStore.buildings.workshopUnlocked"
         button-text="假装可以制造东西"
         tooltip-text="骗你的 点击没用"
       />
@@ -27,10 +27,6 @@ import defaultSettings from '@/config/defaultSettings'
 
 // 接收gameStore实例
 const gameStore = inject('gameStore')
-
-const unlockCart = () => {
-  gameStore.unlockCart()
-}
 
 const getCartTooltip = () => {
   return `木材 ${defaultSettings.building.cart.woodCost}`

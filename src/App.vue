@@ -73,11 +73,11 @@ onMounted(() => {
   gameLoopInterval = setTimeout(gameLoop, 10)
   
   // 初始化任务进场话术
-  gameStore.fireLevel === 0 && gameStore.wood === 0 && gameStore.initGameLog()
+  gameStore.buildings.fire === 0 && gameStore.stores.wood === 0 && gameStore.initGameLog()
   
   // 监听新村民到来事件，切换到村落tab
   eventBus.on('newVillagersArrived', () => {
-    if (activeTab.value !== 'village' && gameStore.villageUnlocked) {
+    if (activeTab.value !== 'village') {
       activeTab.value = 'village'
       updateBrowserTitle('village')
     }
@@ -114,7 +114,7 @@ watch(activeTab, (newTab) => {
 
 // 监听影响标题的状态变化
 watch(
-  [() => gameStore.fireLevel, () => gameStore.villageLevel],
+  [() => gameStore.buildings.fire, () => gameStore.buildings.village],
   () => {
     updateBrowserTitle(activeTab.value)
   }

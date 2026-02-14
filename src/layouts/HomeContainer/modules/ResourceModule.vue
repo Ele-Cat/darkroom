@@ -1,12 +1,12 @@
 <template>
   <div class="game-state">
     <div class="resource-container">
-      <div class="resource-group village-info-group" v-if="activeTab === 'village' && gameStore.villageUnlocked">
+      <div class="resource-group village-info-group" v-if="activeTab === 'village' && gameStore.buildings.village >= 0">
         <div class="inventory-title">{{ gameStore.getVillageName() }}</div>
         <div class="resource">
           <div class="resource-header">
             <span>小屋:</span>
-            <span id="villageLevel">{{ gameStore.villageLevel }}</span>
+            <span id="villageLevel">{{ gameStore.buildings.village }}</span>
           </div>
         </div>
         <div class="resource">
@@ -18,7 +18,7 @@
         <div class="resource">
           <div class="resource-header">
             <span>陷阱:</span>
-            <span>{{ gameStore.traps }}/{{ defaultSettings.building.trap.maxTraps }}</span>
+            <span>{{ gameStore.buildings.traps }}/{{ defaultSettings.building.trap.maxTraps }}</span>
           </div>
         </div>
       </div>
@@ -27,41 +27,41 @@
         <div class="resource">
           <ResourceTooltip 
             resource-name="木材"
-            :resource-amount="Math.floor(gameStore.wood)"
+            :resource-amount="Math.floor(gameStore.stores.wood)"
             resource-id="woodCount"
             :buff-type="''"
             :buff-change="''"
             :net-change="gameStore.materialBuffs.wood"
           />
         </div>
-        <div class="resource" v-if="gameStore.huntingCabinUnlocked || gameStore.traps > 0 || gameStore.meat > 0 || gameStore.fur > 0">
+        <div class="resource" v-if="gameStore.buildings.huntingCabin || gameStore.buildings.traps > 0 || gameStore.stores.meat > 0 || gameStore.stores.fur > 0">
           <ResourceTooltip 
             resource-name="生肉"
-            :resource-amount="Math.floor(gameStore.meat)"
+            :resource-amount="Math.floor(gameStore.stores.meat)"
             resource-id="meatCount"
             :net-change="gameStore.materialBuffs.meat"
           />
         </div>
-        <div class="resource" v-if="gameStore.huntingCabinUnlocked || gameStore.traps > 0 || gameStore.meat > 0 || gameStore.fur > 0">
+        <div class="resource" v-if="gameStore.buildings.huntingCabin || gameStore.buildings.traps > 0 || gameStore.stores.meat > 0 || gameStore.stores.fur > 0">
           <ResourceTooltip 
             resource-name="毛皮"
-            :resource-amount="Math.floor(gameStore.fur)"
+            :resource-amount="Math.floor(gameStore.stores.fur)"
             resource-id="furCount"
             :net-change="gameStore.materialBuffs.fur"
           />
         </div>
-        <div class="resource" v-if="gameStore.smokehouseCabinUnlocked || gameStore.bacon > 0">
+        <div class="resource" v-if="gameStore.buildings.smokehouseCabin || gameStore.stores.bacon > 0">
           <ResourceTooltip 
             resource-name="熏肉"
-            :resource-amount="Math.floor(gameStore.bacon)"
+            :resource-amount="Math.floor(gameStore.stores.bacon)"
             resource-id="baconCount"
             :net-change="gameStore.materialBuffs.bacon"
           />
         </div>
-        <div class="resource" v-if="gameStore.tanneryCabinUnlocked">
+        <div class="resource" v-if="gameStore.buildings.tanneryCabin">
           <ResourceTooltip 
             resource-name="皮革"
-            :resource-amount="Math.floor(gameStore.leather)"
+            :resource-amount="Math.floor(gameStore.stores.leather)"
             resource-id="leatherCount"
             :net-change="gameStore.materialBuffs.leather"
           />
@@ -82,7 +82,7 @@ const gameStore = inject('gameStore')
 const activeTab = inject('activeTab')
 
 const maxPopulation = computed(() => {
-  return gameStore.villageLevel * defaultSettings.building.cabin.maxPopulationPerCabin
+  return gameStore.buildings.village * defaultSettings.building.cabin.maxPopulationPerCabin
 })
 </script>
 

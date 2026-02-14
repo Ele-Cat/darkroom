@@ -6,12 +6,12 @@
       <div class="actions">
         <CollectionModule />
 
-        <BuildModule v-if="activeTab === 'cabin' && gameStore.villageUnlocked" />
+        <BuildModule v-if="activeTab === 'cabin' && gameStore.buildings.village >= 0" />
       </div>
 
-      <CraftModule v-if="activeTab === 'cabin' && gameStore.villageUnlocked" />
+      <CraftModule v-if="activeTab === 'cabin' && gameStore.buildings.village >= 0" />
 
-      <TradingModule v-if="activeTab === 'cabin' && gameStore.tradingPostUnlocked" />
+      <TradingModule v-if="activeTab === 'cabin' && gameStore.buildings.tradingPost" />
       
       <!-- 工作模块 -->
       <JobModule />

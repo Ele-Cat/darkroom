@@ -8,9 +8,9 @@
         button-id="deployTrap"
         button-text="布置陷阱"
         :tooltip-text="getTrapTooltip()"
-        :disabled="gameStore.traps >= defaultSettings.building.trap.maxTraps"
-        :count="gameStore.traps"
-        @button-click="deployTrap"
+        :disabled="gameStore.buildings.traps >= defaultSettings.building.trap.maxTraps"
+        :count="gameStore.buildings.traps"
+        @button-click="gameStore.deployTrap()"
       />
       
       <!-- 居住小屋按钮 -->
@@ -18,59 +18,59 @@
         button-id="buildStructure"
         button-text="居住小屋"
         :tooltip-text="getBuildCostTooltip()"
-        :disabled="gameStore.villageLevel >= 30"
-        :count="gameStore.villageLevel"
-        @button-click="buildStructure"
+        :disabled="gameStore.buildings.village >= 30"
+        :count="gameStore.buildings.village"
+        @button-click="gameStore.buildStructure()"
       />
       
       <!-- 狩猎小屋按钮 -->
       <TooltipButton 
-        v-if="gameStore.villageLevel >= defaultSettings.hunting.cabin.unlockLevel"
+        v-if="gameStore.buildings.village >= defaultSettings.hunting.cabin.unlockLevel"
         button-id="unlockHuntingCabin"
         button-text="狩猎小屋"
         :tooltip-text="getHuntingCabinTooltip()"
-        :disabled="gameStore.huntingCabinUnlocked"
-        @button-click="unlockHuntingCabin"
+        :disabled="gameStore.buildings.huntingCabin"
+        @button-click="gameStore.unlockHuntingCabin()"
       />
       
       <!-- 熏肉小屋按钮 -->
       <TooltipButton 
-        v-if="gameStore.huntingCabinUnlocked && gameStore.villageLevel >= defaultSettings.smokehouse.cabin.unlockLevel"
+        v-if="gameStore.buildings.huntingCabin && gameStore.buildings.village >= defaultSettings.smokehouse.cabin.unlockLevel"
         button-id="unlockSmokehouseCabin"
         button-text="熏肉小屋"
         :tooltip-text="getSmokehouseCabinTooltip()"
-        :disabled="gameStore.smokehouseCabinUnlocked"
-        @button-click="unlockSmokehouseCabin"
+        :disabled="gameStore.buildings.smokehouseCabin"
+        @button-click="gameStore.unlockSmokehouseCabin()"
       />
       
       <!-- 制革小屋按钮 -->
       <TooltipButton 
-        v-if="gameStore.villageLevel >= defaultSettings.tannery.cabin.unlockLevel"
+        v-if="gameStore.buildings.village >= defaultSettings.tannery.cabin.unlockLevel"
         button-id="unlockTanneryCabin"
         button-text="制革小屋"
         :tooltip-text="getTanneryCabinTooltip()"
-        :disabled="gameStore.tanneryCabinUnlocked"
-        @button-click="unlockTanneryCabin"
+        :disabled="gameStore.buildings.tanneryCabin"
+        @button-click="gameStore.unlockTanneryCabin()"
       />
       
       <!-- 工坊按钮 -->
       <TooltipButton 
-        v-if="gameStore.tanneryCabinUnlocked && gameStore.villageLevel >= defaultSettings.workshop.cabin.unlockLevel"
+        v-if="gameStore.buildings.tanneryCabin && gameStore.buildings.village >= defaultSettings.workshop.cabin.unlockLevel"
         button-id="unlockWorkshop"
         button-text="工坊"
         :tooltip-text="getWorkshopTooltip()"
-        :disabled="gameStore.workshopUnlocked"
-        @button-click="unlockWorkshop"
+        :disabled="gameStore.buildings.workshop"
+        @button-click="gameStore.unlockWorkshop()"
       />
       
       <!-- 贸易站按钮 -->
       <TooltipButton 
-        v-if="gameStore.villageLevel >= defaultSettings.tradingPost.cabin.unlockLevel"
+        v-if="gameStore.buildings.village >= defaultSettings.tradingPost.cabin.unlockLevel"
         button-id="unlockTradingPost"
         button-text="贸易站"
         :tooltip-text="getTradingPostTooltip()"
-        :disabled="gameStore.tradingPostUnlocked"
-        @button-click="unlockTradingPost"
+        :disabled="gameStore.buildings.tradingPost"
+        @button-click="gameStore.unlockTradingPost()"
       />
     </div>
   </div>
@@ -84,42 +84,14 @@ import defaultSettings from '@/config/defaultSettings'
 // 接收gameStore实例
 const gameStore = inject('gameStore')
 
-const buildStructure = () => {
-  gameStore.buildStructure()
-}
-
-const deployTrap = () => {
-  gameStore.deployTrap()
-}
-
-const unlockHuntingCabin = () => {
-  gameStore.unlockHuntingCabin()
-}
-
-const unlockTanneryCabin = () => {
-  gameStore.unlockTanneryCabin()
-}
-
-const unlockWorkshop = () => {
-  gameStore.unlockWorkshop()
-}
-
-const unlockSmokehouseCabin = () => {
-  gameStore.unlockSmokehouseCabin()
-}
-
-const unlockTradingPost = () => {
-  gameStore.unlockTradingPost()
-}
-
 const getTrapTooltip = () => {
-  if (gameStore.traps >= defaultSettings.building.trap.maxTraps) {
+  if (gameStore.buildings.traps >= defaultSettings.building.trap.maxTraps) {
     return `陷阱已达到最大数量${defaultSettings.building.trap.maxTraps}个`
   } else {
     const initialWoodCost = defaultSettings.building.trap.initialWoodCost
     const woodCostIncrease = defaultSettings.building.trap.woodCostIncrease
     
-    const woodCost = initialWoodCost + gameStore.traps * woodCostIncrease
+    const woodCost = initialWoodCost + gameStore.buildings.traps * woodCostIncrease
     
     return `木材 ${woodCost}`
   }
@@ -128,7 +100,7 @@ const getTrapTooltip = () => {
 const getBuildCostTooltip = () => {
   const baseWoodCost = defaultSettings.building.cabin.baseWoodCost
   const woodCostIncreasePerLevel = defaultSettings.building.cabin.woodCostIncreasePerLevel
-  const woodCost = baseWoodCost + Math.floor(gameStore.villageLevel * woodCostIncreasePerLevel)
+  const woodCost = baseWoodCost + Math.floor(gameStore.buildings.village * woodCostIncreasePerLevel)
   
   return `木材 ${woodCost}`
 }

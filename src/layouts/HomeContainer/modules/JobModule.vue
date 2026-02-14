@@ -1,5 +1,5 @@
 <template>
-  <div class="job-module" v-if="gameStore.jobModuleUnlocked && activeTab === 'village'">
+  <div class="job-module" v-if="gameStore.population && activeTab === 'village'">
     <div class="job-module-title">工作</div>
     <div class="jobs-list">
       <div 
@@ -54,15 +54,15 @@ const activeTooltip = ref(null);
 const jobTypes = computed(() => {
   return defaultSettings.jobs.types.filter(job => {
     // 如果狩猎小屋未解锁，过滤掉猎人
-    if (!gameStore.huntingCabinUnlocked && job.id === 'hunter') {
+    if (!gameStore.buildings.huntingCabin && job.id === 'hunter') {
       return false;
     }
     // 如果熏肉小屋未解锁，过滤掉熏肉师
-    if (!gameStore.smokehouseCabinUnlocked && job.id === 'butcher') {
+    if (!gameStore.buildings.smokehouseCabin && job.id === 'butcher') {
       return false;
     }
     // 如果制革小屋未解锁，过滤掉皮革师
-    if (!gameStore.tanneryCabinUnlocked && job.id === 'tanner') {
+    if (!gameStore.buildings.tanneryCabin && job.id === 'tanner') {
       return false;
     }
     return true;

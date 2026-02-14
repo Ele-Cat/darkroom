@@ -3,7 +3,7 @@
     <TooltipButton 
       v-if="activeTab === 'cabin'"
       button-id="lightFire"
-      :button-text="gameStore.fireLevel > 0 ? '添柴' : '点燃火堆'"
+      :button-text="gameStore.buildings.fire > 0 ? '添柴' : '点燃火堆'"
       :button-class="getFireButtonClass()"
       tooltip-text="木材 1"
       @button-click="lightFire"
@@ -17,13 +17,13 @@
       @button-click="collectWood"
     />
     <CoolDownButton 
-      v-if="gameStore.villageUnlocked"
+      v-if="gameStore.buildings.village >= 0"
       button-id="checkTraps"
       cooldown-bar-id="checkTrapsCooldown"
       button-text="查看陷阱"
       :cooldown="gameStore.cooldowns.trap"
       :max-cooldown="defaultSettings.building.trap.maxCheckCooldown"
-      :disabled="gameStore.traps <= 0"
+      :disabled="gameStore.buildings.traps <= 0"
       @button-click="checkTraps"
     />
   </div>
@@ -53,7 +53,7 @@ const checkTraps = () => {
 }
 
 const getFireButtonClass = () => {
-  return `fire-button fire-button-${gameStore.fireLevel}`
+  return `fire-button fire-button-${gameStore.buildings.fire}`
 }
 </script>
 

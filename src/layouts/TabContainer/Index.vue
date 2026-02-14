@@ -6,14 +6,14 @@
       :data-tab="'cabin'"
       @click="switchTab('cabin')"
     >
-      {{ gameStore.fireLevel > 0 ? '林中小屋' : '废弃小屋' }}
+      {{ gameStore.buildings.fire > 0 ? '林中小屋' : '废弃小屋' }}
     </div>
     <div 
       class="tab" 
-      :class="{ active: activeTab === 'village', locked: !gameStore.villageUnlocked, unlockable: !gameStore.villageUnlocked && gameStore.wood >= unlockWoodCost }"
+      :class="{ active: activeTab === 'village', locked: gameStore.buildings.village < 0, unlockable: gameStore.buildings.village < 0 && gameStore.stores.wood >= unlockWoodCost }"
       :data-tab="'village'"
-      :data-locked="!gameStore.villageUnlocked"
-      :title="!gameStore.villageUnlocked ? (gameStore.wood >= unlockWoodCost ? '解锁' : `解锁还差 ${Math.max(unlockWoodCost - gameStore.wood, 0)} 木材`) : ''"
+      :data-locked="gameStore.buildings.village < 0"
+      :title="gameStore.buildings.village < 0 ? (gameStore.stores.wood >= unlockWoodCost ? '解锁' : `解锁还差 ${Math.max(unlockWoodCost - gameStore.stores.wood, 0)} 木材`) : ''"
       @click="switchTab('village')"
     >
       {{ gameStore.getVillageName() }}
@@ -43,7 +43,7 @@ const unlockWoodCost = computed(() => defaultSettings.village.unlockWoodCost)
 
 // 切换tab
 const switchTab = (tab) => {
-  if (tab === 'village' && !gameStore.villageUnlocked) {
+  if (tab === 'village' && gameStore.buildings.village < 0) {
     if (gameStore.canUnlockVillage) {
       gameStore.unlockVillage()
       activeTab.value = tab

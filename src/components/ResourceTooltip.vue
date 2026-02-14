@@ -61,7 +61,7 @@ const allEffects = computed(() => {
   if (resourceKey) {
     // 货车对物料的影响
     const cartBuff = defaultSettings.buffs.cart[resourceKey]
-    if (cartBuff > 0 && gameStore.cartUnlocked) {
+    if (cartBuff > 0 && gameStore.buildings.cart) {
       effects.push({
         type: '货车',
         change: `+${cartBuff}/10s`
